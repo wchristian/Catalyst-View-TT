@@ -117,10 +117,10 @@ sub process {
         $self->template->process(
             $name,
             {
-                %{ $c->stash },
                 base => $c->req->base,
                 c    => $c,
-                name => $c->config->{name}
+                name => $c->config->{name},
+                %{ $c->stash }
             },
             \$output
         )
