@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -130,7 +130,7 @@ sub process {
         my $error = $self->template->error;
         $error = qq/Couldn't render template "$error"/;
         $c->log->error($error);
-        $c->errors($error);
+        $c->error($error);
     }
     $c->res->output($output);
     return 1;

@@ -4,7 +4,7 @@ WriteMakefile(
     NAME      => 'Catalyst::View::TT',
     AUTHOR    => 'Sebastian Riedel (sri@oook.de)',
     PREREQ_PM => {
-        Catalyst        => '4.00',
+        Catalyst        => '5.00',
         Template        => 0,
         Template::Timer => 0
     },

@@ -1,9 +1,13 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.10  XXX XXX XX XX:00:00 2005
+        - updated for Catalyst 5
+
 0.09  Wed Mar 29 13:47:00 2005
         - Don't override user-set charset/content-type
         - Cleaned up the content-type we set.
         - Updated README to current POD to current POD
+
 0.08  Wed Mar 29 12:22:00 2005
         - changed order of stash so stash can override c/base/name
         - fixed some typos
