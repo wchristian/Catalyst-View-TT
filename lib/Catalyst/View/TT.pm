@@ -58,7 +58,7 @@ sub new {
         %{ $self->config() }
     );
 
-    unless ( $c->debug && not exists $config{CONTEXT} ) {
+    if ( $c->debug && not exists $config{CONTEXT} ) {
        $config{CONTEXT} = Template::Timer->new(%config);
     }
 
