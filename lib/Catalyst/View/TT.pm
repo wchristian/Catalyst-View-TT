@@ -57,7 +57,11 @@ sub new {
         INCLUDE_PATH => [ $root, "$root/base" ],
         %{ $self->config() }
     );
-    $config{CONTEXT} = Template::Timer->new(%config) if $c->debug;
+
+    unless ( $c->debug && not exists $config{CONTEXT} ) {
+       $config{CONTEXT} = Template::Timer->new(%config);
+    }
+
     $self->template( Template->new( \%config ) );
     return $self;
 }
