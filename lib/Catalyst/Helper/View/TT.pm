@@ -8,7 +8,7 @@ Catalyst::Helper::View::TT - Helper for TT Views
 
 =head1 SYNOPSIS
 
-    bin/create view TT TT
+    script/create.pl view TT TT
 
 =head1 DESCRIPTION
 
