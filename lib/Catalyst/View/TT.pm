@@ -115,7 +115,7 @@ L<Catalyst>.
 =head1 AUTHOR
 
 Sebastian Riedel, C<sri@cpan.org>
-Marcus Ramberg
+Marcus Ramberg, C<mramberg@cpan.org>
 
 =head1 COPYRIGHT
 
