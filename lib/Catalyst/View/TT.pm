@@ -11,7 +11,7 @@ our $VERSION = '0.05';
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_classdata('config');
 
-__PACKAGE__->config( { EVAL_PERL => 1 } );
+__PACKAGE__->config( { EVAL_PERL => 0 } );
 
 =head1 NAME
 
@@ -35,7 +35,16 @@ Catalyst::View::TT - Template View Class
 
 =head1 DESCRIPTION
 
-This is the C<Template> view class.
+This is the C<Template> view class. Your subclass should inherit 
+from this class. If you want to override TT config settings, you 
+can do it there by setting __PACKAGE__->config->{OPTION} as shown
+in the synopsis. Of interest might be EVAL_PERL, which is disabled
+by default, and LOAD_TEMPLATES, which is set to use the provider.
+
+If you want to use EVAL perl, add something like this:
+
+    __PACKAGE__->config->{EVAL_PERL} = 1;
+    __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
 
 =head2 OVERLOADED METHODS
 
@@ -45,11 +54,16 @@ sub new {
     my $class  = shift;
     my $c      = shift;
     my $self   = $class->NEXT::new(@_);
+    our ($template, $provider);
     my $root   = $c->config->{root};
-    my %config =
-      ( %{ $class->config }, INCLUDE_PATH => [ $root, "$root/base" ] );
+    $provider ||= Template::Provider->new();
+    $provider->include_path([ $root, "$root/base" ]);
+    my %config= ( LOAD_TEMPLATES => [ $provider ],
+                  %{ $class->config() },
+                  INCLUDE_PATH => [ $root, "$root/base" ]
+                );
     $config{CONTEXT} = Template::Timer->new(%config) if $c->debug;
-    $self->template( Template->new( \%config ) );
+    $self->template( Template->new(\%config));
     return $self;
 }
 
