@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -28,20 +28,48 @@ Catalyst::View::TT - Template View Class
 
     1;
     
+    # Meanwhile, maybe in an '!end' action
     $c->forward('MyApp::View::TT');
+
 
 =head1 DESCRIPTION
 
-This is the C<Template> view class. Your subclass should inherit 
-from this class. If you want to override TT config settings, you 
-can do it there by setting __PACKAGE__->config->{OPTION} as shown
-in the synopsis. Of interest might be EVAL_PERL, which is disabled
-by default, and LOAD_TEMPLATES, which is set to use the provider.
+This is the C<Template> view class. Your subclass should inherit from this
+class.  The plugin renders the template specified in C<< $c->stash->{template} >>
+or C<< $c->request->match >>.  The template variables are set up from the
+contents of C<< $c->stash >>, augmented with C<base> set to C<< $c->req->base >>,
+C<c> to C<$c> and C<name> to C<< $c->config->{name} >>.  The output is
+stored in C<< $c->response->output >>.
+
+
+If you want to override TT config settings, you can do it there by setting
+C<< __PACKAGE__->config->{OPTION} >> as shown in the synopsis. Of interest might be
+C<EVAL_PERL>, which is disabled by default, and C<LOAD_TEMPLATES>, which is set to
+use the provider.
 
 If you want to use EVAL perl, add something like this:
 
     __PACKAGE__->config->{EVAL_PERL} = 1;
     __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
+
+If you have configured Catalyst for debug output C<Catalyst::View::TT> will
+enable profiling of template processing (using C<Template::Timer>.  This will cause
+HTML comments will get embedded in the output from your templates, such as:
+
+    <!-- TIMER START: process mainmenu/mainmenu.ttml -->
+    <!-- TIMER START: include mainmenu/cssindex.tt -->
+    <!-- TIMER START: process mainmenu/cssindex.tt -->
+    <!-- TIMER END: process mainmenu/cssindex.tt (0.017279 seconds) -->
+    <!-- TIMER END: include mainmenu/cssindex.tt (0.017401 seconds) -->
+
+    ....
+
+    <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
+
+You can supress template profiling when debug is enabled by setting:
+
+    __PACKAGE__->config->{CONTEXT} = undef;
+
 
 =head2 METHODS
 
@@ -68,8 +96,10 @@ sub new {
 
 =head3 process
 
-Renders the template specified in $c->stash->{template} or $c->request->match
-to $c->response->output.
+Renders the template specified in C<< $c->stash->{template} >> or C<< $c->request->match >>.
+Template variables are set up from the contents of C<< $c->stash >>, augmented with C<base>
+set to C<< $c->req->base >>, C<c> to C<$c> and C<name> to C<< $c->config->{name} >>.  Output is
+stored in C<< $c->response->output >>.
 
 =cut
 
