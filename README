@@ -14,24 +14,53 @@ SYNOPSIS
 
         1;
     
+        # Meanwhile, maybe in an '!end' action
         $c->forward('MyApp::View::TT');
 
 DESCRIPTION
     This is the "Template" view class. Your subclass should inherit from
-    this class. If you want to override TT config settings, you can do it
-    there by setting __PACKAGE__->config->{OPTION} as shown in the synopsis.
-    Of interest might be EVAL_PERL, which is disabled by default, and
-    LOAD_TEMPLATES, which is set to use the provider.
+    this class. The plugin renders the template specified in
+    "$c->stash->{template}" or "$c->request->match". The template variables
+    are set up from the contents of "$c->stash", augmented with "base" set
+    to "$c->req->base", "c" to $c and "name" to "$c->config->{name}". The
+    output is stored in "$c->response->output".
+
+    If you want to override TT config settings, you can do it there by
+    setting "__PACKAGE__->config->{OPTION}" as shown in the synopsis. Of
+    interest might be "EVAL_PERL", which is disabled by default, and
+    "LOAD_TEMPLATES", which is set to use the provider.
 
     If you want to use EVAL perl, add something like this:
 
         __PACKAGE__->config->{EVAL_PERL} = 1;
         __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
 
+    If you have configured Catalyst for debug output "Catalyst::View::TT"
+    will enable profiling of template processing (using "Template::Timer".
+    This will cause HTML comments will get embedded in the output from your
+    templates, such as:
+
+        <!-- TIMER START: process mainmenu/mainmenu.ttml -->
+        <!-- TIMER START: include mainmenu/cssindex.tt -->
+        <!-- TIMER START: process mainmenu/cssindex.tt -->
+        <!-- TIMER END: process mainmenu/cssindex.tt (0.017279 seconds) -->
+        <!-- TIMER END: include mainmenu/cssindex.tt (0.017401 seconds) -->
+
+        ....
+
+        <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
+
+    You can supress template profiling when debug is enabled by setting:
+
+        __PACKAGE__->config->{CONTEXT} = undef;
+
   METHODS
    process
-    Renders the template specified in $c->stash->{template} or
-    $c->request->match to $c->response->output.
+    Renders the template specified in "$c->stash->{template}" or
+    "$c->request->match". Template variables are set up from the contents of
+    "$c->stash", augmented with "base" set to "$c->req->base", "c" to $c and
+    "name" to "$c->config->{name}". Output is stored in
+    "$c->response->output".
 
    config
     This allows your view subclass to pass additional settings to the TT
@@ -41,7 +70,7 @@ SEE ALSO
     Catalyst.
 
 AUTHOR
-    Sebastian Riedel, "sri@cpan.org" Marcus Ramberg
+    Sebastian Riedel, "sri@cpan.org" Marcus Ramberg, "mramberg@cpan.org"
 
 COPYRIGHT
     This program is free software, you can redistribute it and/or modify it
