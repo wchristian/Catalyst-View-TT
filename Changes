@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.09  Wed Mar 29 13:47:00 2005
+        - Don't override user-set charset/content-type
+        - Cleaned up the content-type we set.
 0.08  Wed Mar 29 12:22:00 2005
         - changed order of stash so stash can override c/base/name
         - fixed some typos

@@ -105,7 +105,8 @@ stored in C<< $c->response->output >>.
 
 sub process {
     my ( $self, $c ) = @_;
-    $c->res->headers->content_type('text/html;charset=utf8');
+    $c->res->headers->content_type('text/html; charset=utf-8') 
+    unless $c->res->headers->content_type();
     my $output;
     my $name = $c->stash->{template} || $c->req->match;
     unless ($name) {
