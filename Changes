@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.06  Fri Mar 04 20:00:00 2005
+        - new helper api
+
 0.05  Mon Feb 28 10:00:00 2005
         - added helper
 

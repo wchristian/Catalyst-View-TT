@@ -1,7 +1,6 @@
 package Catalyst::Helper::View::TT;
 
 use strict;
-use IO::File;
 
 =head1 NAME
 
@@ -25,8 +24,7 @@ sub mk_compclass {
     my ( $self, $helper ) = @_;
     my $file  = $helper->{file};
     my $class = $helper->{class};
-    my $comp  = IO::File->new("> $file") or die qq/Couldn't open "$file", "$!"/;
-    print $comp <<"EOF";
+    $helper->mk_file( $file, <<"EOF");
 package $class;
 
 use strict;
