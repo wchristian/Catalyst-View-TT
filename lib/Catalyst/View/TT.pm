@@ -1,17 +1,14 @@
 package Catalyst::View::TT;
 
 use strict;
-use base qw/Catalyst::Base Class::Data::Inheritable/;
+use base qw/Catalyst::Base/;
 use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 __PACKAGE__->mk_accessors('template');
-__PACKAGE__->mk_classdata('config');
-
-__PACKAGE__->config( { EVAL_PERL => 0 } );
 
 =head1 NAME
 
@@ -20,7 +17,7 @@ Catalyst::View::TT - Template View Class
 =head1 SYNOPSIS
 
     # use the helper
-    create view TT TT
+    create.pl view TT TT
 
     # lib/MyApp/View/TT.pm
     package MyApp::View::TT;
@@ -46,24 +43,22 @@ If you want to use EVAL perl, add something like this:
     __PACKAGE__->config->{EVAL_PERL} = 1;
     __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
 
-=head2 OVERLOADED METHODS
+=head2 METHODS
 
 =cut
 
 sub new {
-    my $class  = shift;
-    my $c      = shift;
-    my $self   = $class->NEXT::new(@_);
-    our ($template, $provider);
+    my $self = shift;
+    my $c    = shift;
+    $self = $self->NEXT::new(@_);
     my $root   = $c->config->{root};
-    $provider ||= Template::Provider->new();
-    $provider->include_path([ $root, "$root/base" ]);
-    my %config= ( LOAD_TEMPLATES => [ $provider ],
-                  %{ $class->config() },
-                  INCLUDE_PATH => [ $root, "$root/base" ]
-                );
+    my %config = (
+        EVAL_PERL    => 0,
+        INCLUDE_PATH => [ $root, "$root/base" ],
+        %{ $class->config() }
+    );
     $config{CONTEXT} = Template::Timer->new(%config) if $c->debug;
-    $self->template( Template->new(\%config));
+    $self->template( Template->new( \%config ) );
     return $self;
 }
 

@@ -3,7 +3,7 @@ NAME
 
 SYNOPSIS
         # use the helper
-        create view TT TT
+        create.pl view TT TT
 
         # lib/MyApp/View/TT.pm
         package MyApp::View::TT;
@@ -17,9 +17,18 @@ SYNOPSIS
         $c->forward('MyApp::View::TT');
 
 DESCRIPTION
-    This is the "Template" view class.
+    This is the "Template" view class. Your subclass should inherit from
+    this class. If you want to override TT config settings, you can do it
+    there by setting __PACKAGE__->config->{OPTION} as shown in the synopsis.
+    Of interest might be EVAL_PERL, which is disabled by default, and
+    LOAD_TEMPLATES, which is set to use the provider.
 
-  OVERLOADED METHODS
+    If you want to use EVAL perl, add something like this:
+
+        __PACKAGE__->config->{EVAL_PERL} = 1;
+        __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
+
+  METHODS
    process
     Renders the template specified in $c->stash->{template} or
     $c->request->match to $c->response->output.
