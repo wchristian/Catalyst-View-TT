@@ -55,7 +55,7 @@ sub new {
     my %config = (
         EVAL_PERL    => 0,
         INCLUDE_PATH => [ $root, "$root/base" ],
-        %{ $class->config() }
+        %{ $self->config() }
     );
     $config{CONTEXT} = Template::Timer->new(%config) if $c->debug;
     $self->template( Template->new( \%config ) );
