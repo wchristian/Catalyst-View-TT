@@ -1,0 +1,16 @@
+Revision history for Perl extension Catalyst::View::TT.
+
+0.05  Mon Feb 28 10:00:00 2005
+        - added helper
+
+0.04  Sun Feb 27 22:00:00 2005
+        - better debug messages (Marcus Ramberg)
+
+0.03  Thu Feb 17 22:00:00 2005
+        - don't try to render something without a template
+
+0.02  Tue Feb 01 02:00:00 2005
+        - using $c->req->match instead of $c->req->action
+
+0.01  Fri Jan 28 22:00:00 2005
+        - first release
