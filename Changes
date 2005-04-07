@@ -1,6 +1,7 @@
 Revision history for Perl extension Catalyst::View::TT.
 
 0.10  XXX XXX XX XX:00:00 2005
+        - Added POD tests and made them pass.
         - updated for Catalyst 5
 
 0.09  Wed Mar 29 13:47:00 2005

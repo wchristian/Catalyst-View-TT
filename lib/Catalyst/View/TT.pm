@@ -73,6 +73,13 @@ You can supress template profiling when debug is enabled by setting:
 
 =head2 METHODS
 
+=over 4
+
+=item new
+
+The constructor for the TT view. Sets up the template provider, 
+and reads the application config.
+
 =cut
 
 sub new {
@@ -94,12 +101,14 @@ sub new {
     return $self;
 }
 
-=head3 process
+=item process
 
-Renders the template specified in C<< $c->stash->{template} >> or C<< $c->request->match >>.
-Template variables are set up from the contents of C<< $c->stash >>, augmented with C<base>
-set to C<< $c->req->base >>, C<c> to C<$c> and C<name> to C<< $c->config->{name} >>.  Output is
-stored in C<< $c->response->output >>.
+Renders the template specified in C<< $c->stash->{template} >> or C<< 
+$c->request->match >>.
+Template variables are set up from the contents of C<< $c->stash >>, 
+Jaugmented with C<base> set to C<< $c->req->base >>, C<c> to C<$c> and 
+C<name> to C<< $c->config->{name} >>.  Output is stored in 
+C<< $c->response->output >>.
 
 =cut
 
@@ -136,16 +145,16 @@ sub process {
     return 1;
 }
 
-=head3 config
+=item config
 
 This allows your view subclass to pass additional settings to the
 TT config hash.
 
-=cut 
+=back
 
 =head1 SEE ALSO
 
-L<Catalyst>.
+L<Catalyst>. L<Template::Manual>
 
 =head1 AUTHOR
 
@@ -154,8 +163,8 @@ Marcus Ramberg, C<mramberg@cpan.org>
 
 =head1 COPYRIGHT
 
-This program is free software, you can redistribute it and/or modify it under
-the same terms as Perl itself.
+This program is free software, you can redistribute it and/or modify it 
+under the same terms as Perl itself.
 
 =cut
 
