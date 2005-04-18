@@ -23,7 +23,7 @@ Helper for TT Views.
 sub mk_compclass {
     my ( $self, $helper ) = @_;
     my $file = $helper->{file};
-    $helper->mk_file( 'compclass', $file );
+    $helper->render_file( 'compclass', $file );
 }
 
 =head1 SEE ALSO
