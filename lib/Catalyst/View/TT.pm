@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -114,18 +114,21 @@ C<< $c->response->output >>.
 
 sub process {
     my ( $self, $c ) = @_;
-    $c->res->headers->content_type('text/html; charset=utf-8') 
-    unless $c->res->headers->content_type();
-    my $output;
-    my $name = $c->stash->{template} || $c->req->match;
-    unless ($name) {
+
+    my $template = $c->stash->{template} || $c->request->match;
+
+    unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
         return 0;
     }
-    $c->log->debug(qq/Rendering template "$name"/) if $c->debug;
+
+    $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
+    
+    my $output;
+
     unless (
         $self->template->process(
-            $name,
+            $template,
             {
                 base => $c->req->base,
                 c    => $c,
@@ -140,8 +143,15 @@ sub process {
         $error = qq/Couldn't render template "$error"/;
         $c->log->error($error);
         $c->error($error);
+        return 0;
     }
-    $c->res->output($output);
+    
+    unless ( $c->response->content_type ) {
+        $c->response->content_type('text/html; charset=utf-8');
+    }
+
+    $c->response->body($output);
+
     return 1;
 }
 
