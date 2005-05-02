@@ -66,12 +66,12 @@ Very nice component.
 
 =head1 AUTHOR
 
-Clever guy
+[% author %]
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify it under
-the same terms as perl itself.
+This library is free software . You can redistribute it and/or modify it 
+under the same terms as perl itself.
 
 =cut
 
