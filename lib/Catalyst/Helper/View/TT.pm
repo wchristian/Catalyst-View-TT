@@ -58,11 +58,11 @@ use base 'Catalyst::View::TT';
 
 =head1 SYNOPSIS
 
-    Very simple to use
+See L<[% app %]>
 
 =head1 DESCRIPTION
 
-Very nice component.
+TT View Component.
 
 =head1 AUTHOR
 
