@@ -17,7 +17,7 @@ Catalyst::View::TT - Template View Class
 =head1 SYNOPSIS
 
     # use the helper
-    create.pl view TT TT
+    myapp_create.pl view TT TT
 
     # lib/MyApp/View/TT.pm
     package MyApp::View::TT;
@@ -26,35 +26,46 @@ Catalyst::View::TT - Template View Class
 
     __PACKAGE__->config->{DEBUG} = 'all';
 
+    # in practice you'd probably set this from a config file;
+    # defaults to $c->config->root
+    __PACKAGE__->config->{INCLUDE_PATH} =
+       '/usr/local/generic/templates:/usr/local/myapp/templates';
+
     1;
     
-    # Meanwhile, maybe in an '!end' action
+    # Meanwhile, maybe in a private C<end> action
     $c->forward('MyApp::View::TT');
 
 
 =head1 DESCRIPTION
 
-This is the C<Template> view class. Your subclass should inherit from this
-class.  The plugin renders the template specified in C<< $c->stash->{template} >>
-or C<< $c->request->match >>.  The template variables are set up from the
-contents of C<< $c->stash >>, augmented with C<base> set to C<< $c->req->base >>,
-C<c> to C<$c> and C<name> to C<< $c->config->{name} >>.  The output is
-stored in C<< $c->response->output >>.
+This is the Catalyst view class for the L<Template
+Toolkit|Template>. Your application subclass should inherit from this
+class. This plugin renders the template specified in
+C<$c-E<gt>stash-E<gt>{template}>, or failing that,
+C<$c-E<gt>request-E<gt>match>. The template variables are set up from
+the contents of C<$c-E<gt>stash>, augmented with template variable
+C<base> set to Catalyst's C<$c-E<gt>req-E<gt>base>, template variable
+C<c> to Catalyst's C<$c>, and template variable C<name> to Catalyst's
+C<$c-E<gt>config-E<gt>{name}>. The output is stored in
+C<$c-E<gt>response-E<gt>output>.
 
+If you want to override TT config settings, you can do it in your
+application's view class by setting
+C<__PACKAGE__-E<gt>config-E<gt>{OPTION}>, as shown in the Synopsis. Of
+interest might be C<EVAL_PERL>, which is disabled by default,
+C<INCLUDE_PATH>, and C<LOAD_TEMPLATES>, which is set to use the
+provider.
 
-If you want to override TT config settings, you can do it there by setting
-C<< __PACKAGE__->config->{OPTION} >> as shown in the synopsis. Of interest might be
-C<EVAL_PERL>, which is disabled by default, and C<LOAD_TEMPLATES>, which is set to
-use the provider.
-
-If you want to use EVAL perl, add something like this:
+If you want to use C<EVAL_PERL>, add something like this:
 
     __PACKAGE__->config->{EVAL_PERL} = 1;
     __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
 
-If you have configured Catalyst for debug output C<Catalyst::View::TT> will
-enable profiling of template processing (using C<Template::Timer>.  This will cause
-HTML comments will get embedded in the output from your templates, such as:
+If you have configured Catalyst for debug output, C<Catalyst::View::TT>
+will enable profiling of template processing (using
+L<Template::Timer>). This will embed HTML comments in the output from
+your templates, such as:
 
     <!-- TIMER START: process mainmenu/mainmenu.ttml -->
     <!-- TIMER START: include mainmenu/cssindex.tt -->
@@ -66,7 +77,7 @@ HTML comments will get embedded in the output from your templates, such as:
 
     <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
 
-You can supress template profiling when debug is enabled by setting:
+You can suppress template profiling when debug is enabled by setting:
 
     __PACKAGE__->config->{CONTEXT} = undef;
 
@@ -103,12 +114,12 @@ sub new {
 
 =item process
 
-Renders the template specified in C<< $c->stash->{template} >> or C<< 
-$c->request->match >>.
-Template variables are set up from the contents of C<< $c->stash >>, 
-Jaugmented with C<base> set to C<< $c->req->base >>, C<c> to C<$c> and 
-C<name> to C<< $c->config->{name} >>.  Output is stored in 
-C<< $c->response->output >>.
+Renders the template specified in C<$c-E<gt>stash-E<gt>{template}> or
+C<$c-E<gt>request-E<gt>match>. Template variables are set up from the
+contents of C<$c-E<gt>stash>, augmented with C<base> set to
+C<$c-E<gt>req-E<gt>base>, C<c> to C<$c> and C<name> to
+C<$c-E<gt>config-E<gt>{name}>. Output is stored in
+C<$c-E<gt>response-E<gt>output>.
 
 =cut
 
@@ -164,12 +175,13 @@ TT config hash.
 
 =head1 SEE ALSO
 
-L<Catalyst>. L<Template::Manual>
+L<Catalyst>, L<Template::Manual>
 
 =head1 AUTHOR
 
 Sebastian Riedel, C<sri@cpan.org>
 Marcus Ramberg, C<mramberg@cpan.org>
+Jesse Sheidlower, C<jester@panix.com>
 
 =head1 COPYRIGHT
 
