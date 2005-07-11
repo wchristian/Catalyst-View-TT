@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -94,22 +94,22 @@ and reads the application config.
 =cut
 
 sub new {
-    my $self = shift;
-    my $c    = shift;
-    $self = $self->NEXT::new(@_);
-    my $root   = $c->config->{root};
+    my ( $class, $c, $arguments ) = @_;
+
+    my $root = $c->config->{root};
+
     my %config = (
         EVAL_PERL    => 0,
         INCLUDE_PATH => [ $root, "$root/base" ],
-        %{ $self->config() }
+        %{ $class->config },
+        %{ $arguments }
     );
 
     if ( $c->debug && not exists $config{CONTEXT} ) {
        $config{CONTEXT} = Template::Timer->new(%config);
     }
 
-    $self->template( Template->new( \%config ) );
-    return $self;
+    return $class->NEXT::new( $c, { template => Template->new( \%config ) } );
 }
 
 =item process
