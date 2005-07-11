@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::View::TT.
 
-0.12  Xxx Xxx 00 00:00:00 2005
+0.12  Web Jul 06 15:24:00 2005
         - Fixed, don't set Content-Type on failure
         - Fixed helper to use [%author%]
         - Fixed helper templates
