@@ -1,7 +1,8 @@
 Revision history for Perl extension Catalyst::View::TT.
 
-0.12  Xxx Xxx 00 00:00:00 2005
+0.13  Xxx Xxx 00 00:00:00 2005
         - Fixed constructor
+        - Big update by Andy Wardley
 
 0.12  Web Jul 06 15:24:00 2005
         - Fixed, don't set Content-Type on failure

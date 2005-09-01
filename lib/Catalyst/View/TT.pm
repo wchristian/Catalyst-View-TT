@@ -16,56 +16,218 @@ Catalyst::View::TT - Template View Class
 
 =head1 SYNOPSIS
 
-    # use the helper
+# use the helper to create View
     myapp_create.pl view TT TT
 
-    # lib/MyApp/View/TT.pm
-    package MyApp::View::TT;
+# configure in lib/MyApp.pm
 
-    use base 'Catalyst::View::TT';
+    our $ROOT = '/home/dent/catalyst/MyApp';
 
-    __PACKAGE__->config->{DEBUG} = 'all';
+    MyApp->config({
+        name     => 'MyApp',
+        root     => $ROOT,
+        'MyApp::V::TT' => {
+            # any TT configurations items go here
+            INCLUDE_PATH => [
+              "$ROOT/templates/src", 
+              "$ROOT/templates/lib"
+            ],
+            PRE_PROCESS => 'config/main',
+            WRAPPER     => 'site/wrapper',
 
-    # in practice you'd probably set this from a config file;
-    # defaults to $c->config->root
-    __PACKAGE__->config->{INCLUDE_PATH} =
-       '/usr/local/generic/templates:/usr/local/myapp/templates';
-
-    1;
+            # two optional config items
+            CATALYST_VAR => 'Catalyst',
+            TIMER        => 1,
+        },
+    });
+         
+# render view from lib/MyApp.pm or lib/MyApp::C::SomeController.pm
     
-    # Meanwhile, maybe in a private C<end> action
-    $c->forward('MyApp::View::TT');
+    sub message : Global {
+        my ($self, $c) = @_;
+        $c->stash->{ template } = 'message.tt2';
+        $c->stash->{ message  } = 'Hello World!';
+        $c->forward('MyApp::V::TT');
+    }
 
+# access variables from template
+
+    The message is: [% message %].
+    
+    # example when CATALYST_VAR is set to 'Catalyst'
+    Context is [% Catalyst %]          
+    The base is [% Catalyst.req.base %] 
+    The name is [% Catalyst.config.name %] 
+    
+    # example when CATALYST_VAR isn't set
+    Context is [% c %]
+    The base is [% base %]
+    The name is [% name %]
 
 =head1 DESCRIPTION
 
-This is the Catalyst view class for the L<Template
-Toolkit|Template>. Your application subclass should inherit from this
-class. This plugin renders the template specified in
-C<$c-E<gt>stash-E<gt>{template}>, or failing that,
-C<$c-E<gt>request-E<gt>match>. The template variables are set up from
-the contents of C<$c-E<gt>stash>, augmented with template variable
-C<base> set to Catalyst's C<$c-E<gt>req-E<gt>base>, template variable
-C<c> to Catalyst's C<$c>, and template variable C<name> to Catalyst's
-C<$c-E<gt>config-E<gt>{name}>. The output is stored in
+This is the Catalyst view class for the L<Template Toolkit|Template>.
+Your application should defined a view class which is a subclass of
+this module.  The easiest way to achieve this is using the
+F<myapp_create.pl> script (where F<myapp> should be replaced with
+whatever your application is called).  This script is created as part
+of the Catalyst setup.
+
+    $ script/myapp_create.pl view TT TT
+
+This creates a MyApp::V::TT.pm module in the F<lib> directory (again,
+replacing C<MyApp> with the name of your application) which looks
+something like this:
+
+    package FooBar::V::TT;
+    
+    use strict;
+     use base 'Catalyst::View::TT';
+
+    __PACKAGE__->config->{DEBUG} = 'all';
+
+Now you can modify your action handlers in the main application and/or
+controllers to forward to your view class.  You might choose to do this
+in the end() method, for example, to automatically forward all actions
+to the TT view class.
+
+    # In MyApp or MyApp::Controller::SomeController
+    
+    sub end : Private {
+        my($self, $c) = @_;
+        $c->forward('MyApp::V::TT');
+    }
+
+=head2 CONFIGURATION
+
+There are a three different ways to configure your view class.  The
+first way is to call the C<config()> method in the view subclass.  This
+happens when the module is first loaded.
+
+    package MyApp::V::TT;
+    
+    use strict;
+    use base 'Catalyst::View::TT';
+
+    our $ROOT = '/home/dent/catalyst/MyApp';
+    
+    MyApp::V::TT->config({
+        INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+        PRE_PROCESS  => 'config/main',
+        WRAPPER      => 'site/wrapper',
+    });
+
+The second way is to define a C<new()> method in your view subclass.
+This performs the configuration when the view object is created,
+shortly after being loaded.  Remember to delegate to the base class
+C<new()> method (via C<$self-E<gt>NEXT::new()> in the example below) after
+performing any configuration.
+
+    sub new {
+        my $self = shift;
+        $self->config({
+            INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+            PRE_PROCESS  => 'config/main',
+            WRAPPER      => 'site/wrapper',
+        });
+        return $self->NEXT::new(@_);
+    }
+ 
+The final, and perhaps most direct way, is to define a C<template>
+item in your main application configuration, again by calling the
+uniquitous C<config()> method.  The items in the C<template> hash are
+added to those already defined by the above two methods.  This happens
+in the base class new() method (which is one reason why you must
+remember to call it via C<NEXT> if you redefine the C<new()> method in a
+subclass).
+
+    package MyApp;
+    
+    use strict;
+    use Catalyst;
+    
+    our $ROOT = '/home/dent/catalyst/MyApp';
+    
+    MyApp->config({
+        name     => 'MyApp',
+        root     => $ROOT,
+        'MyApp::V::TT' => {
+            INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+            PRE_PROCESS  => 'config/main',
+            WRAPPER      => 'site/wrapper',
+        },
+    });
+
+Note that any configuration items defined by one of the earlier
+methods will be overwritten by items of the same name provided by the
+latter methods.  
+
+=head2 RENDERING VIEWS
+
+The view plugin renders the template specified in the C<template>
+item in the stash.  
+
+    sub message : Global {
+        my ($self, $c) = @_;
+        $c->stash->{ template } = 'message.tt2';
+        $c->forward('MyApp::V::TT');
+    }
+
+If a C<template> item isn't defined, then it instead uses the
+current match, as returned by C<$c-E<gt>match>.  In the above 
+example, this would be C<message>.
+
+The items defined in the stash are passed to the Template Toolkit for
+use as template variables.
+
+sub message : Global {
+    sub default : Private {
+        my ($self, $c) = @_;
+        $c->stash->{ template } = 'message.tt2';
+        $c->stash->{ message  } = 'Hello World!';
+        $c->forward('MyApp::V::TT');
+    }
+
+A number of other template variables are also added:
+
+    c      A reference to the context object, $c
+    base   The URL base, from $c->req->base()
+    name   The application name, from $c->config->{ name }
+
+These can be accessed from the template in the usual way:
+
+<message.tt2>:
+
+    The message is: [% message %]
+    The base is [% base %]
+    The name is [% name %]
+
+If you prefer, you can set the C<CATALYST_VAR> configuration item to
+define the name of a template variable through which the context can
+be referenced.
+
+    MyApp->config({
+        name     => 'MyApp',
+        root     => $ROOT,
+        'MyApp::V::TT' => {
+            CATALYST_VAR => 'Catalyst',
+        },
+    });
+
+F<message.tt2>:
+
+    The base is [% Catalyst.req.base %]
+    The name is [% Catalyst.config.name %]
+
+The output generated by the template is stored in
 C<$c-E<gt>response-E<gt>output>.
 
-If you want to override TT config settings, you can do it in your
-application's view class by setting
-C<__PACKAGE__-E<gt>config-E<gt>{OPTION}>, as shown in the Synopsis. Of
-interest might be C<EVAL_PERL>, which is disabled by default,
-C<INCLUDE_PATH>, and C<LOAD_TEMPLATES>, which is set to use the
-provider.
+=head2 TEMPLATE PROFILING
 
-If you want to use C<EVAL_PERL>, add something like this:
-
-    __PACKAGE__->config->{EVAL_PERL} = 1;
-    __PACKAGE__->config->{LOAD_TEMPLATES} = undef;
-
-If you have configured Catalyst for debug output, C<Catalyst::View::TT>
-will enable profiling of template processing (using
-L<Template::Timer>). This will embed HTML comments in the output from
-your templates, such as:
+If you have configured Catalyst for debug output,
+C<Catalyst::View::TT> will enable profiling of template processing
+(using L<Template::Timer>). This will embed HTML comments in the
+output from your templates, such as:
 
     <!-- TIMER START: process mainmenu/mainmenu.ttml -->
     <!-- TIMER START: include mainmenu/cssindex.tt -->
@@ -77,10 +239,14 @@ your templates, such as:
 
     <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
 
-You can suppress template profiling when debug is enabled by setting:
+You can suppress template profiling by setting the C<TIMER> configuration
+item to a false value.
 
-    __PACKAGE__->config->{CONTEXT} = undef;
-
+    MyApp->config({
+        'MyApp::V::TT' => {
+            TIMER => 0,
+        },
+    });
 
 =head2 METHODS
 
@@ -102,14 +268,39 @@ sub new {
         EVAL_PERL    => 0,
         INCLUDE_PATH => [ $root, "$root/base" ],
         %{ $class->config },
-        %{ $arguments }
+        %{$arguments}
     );
 
-    if ( $c->debug && not exists $config{CONTEXT} ) {
-       $config{CONTEXT} = Template::Timer->new(%config);
+    # if we're debugging and/or the TIMER option is set, then we install
+    # Template::Timer as a custom CONTEXT object, but only if we haven't
+    # already got a custom CONTEXT defined
+
+    if ( $config{TIMER} || ( $c->debug() && !exists $config{TIMER} ) ) {
+        if ( $config{CONTEXT} ) {
+            $c->log->error(
+                'Cannot use Template::Timer - a TT CONFIG is already defined');
+        }
+        else {
+            $config{CONTEXT} = Template::Timer->new( \%config );
+        }
     }
 
-    return $class->NEXT::new( $c, { template => Template->new( \%config ) } );
+    if ( $c->debug && $config{DUMP_CONFIG} ) {
+        use Data::Dumper;
+        $c->log->debug( "TT Config: ", Dumper( \%config ) );
+    }
+
+    return $class->NEXT::new(
+        $c,
+        {
+            template => Template->new( \%config ) || do {
+                my $error = Template->error();
+                $c->log->error($error);
+                $c->error($error);
+                return undef;
+              }
+        }
+    );
 }
 
 =item process
@@ -118,8 +309,11 @@ Renders the template specified in C<$c-E<gt>stash-E<gt>{template}> or
 C<$c-E<gt>request-E<gt>match>. Template variables are set up from the
 contents of C<$c-E<gt>stash>, augmented with C<base> set to
 C<$c-E<gt>req-E<gt>base>, C<c> to C<$c> and C<name> to
-C<$c-E<gt>config-E<gt>{name}>. Output is stored in
-C<$c-E<gt>response-E<gt>output>.
+C<$c-E<gt>config-E<gt>{name}>. Alternately, the C<CATALYST_VAR>
+configuration item can be defined to specify the name of a template
+variable through which the context reference (C<$c>) can be accessed.
+In this case, the C<c>, C<base> and C<name> variables are omitted.
+Output is stored in C<$c-E<gt>response-E<gt>output>.
 
 =cut
 
@@ -134,29 +328,28 @@ sub process {
     }
 
     $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
-    
-    my $output;
 
-    unless (
-        $self->template->process(
-            $template,
-            {
-                base => $c->req->base,
-                c    => $c,
-                name => $c->config->{name},
-                %{ $c->stash }
-            },
-            \$output
-        )
-      )
-    {
+    my $output;
+    my $cvar = $self->config->{CATALYST_VAR};
+    my $vars = {
+        defined $cvar
+        ? ( $cvar => $c )
+        : (
+            c    => $c,
+            base => $c->req->base,
+            name => $c->config->{name}
+        ),
+        %{ $c->stash() }
+    };
+
+    unless ( $self->template->process( $template, $vars, \$output ) ) {
         my $error = $self->template->error;
         $error = qq/Couldn't render template "$error"/;
         $c->log->error($error);
         $c->error($error);
         return 0;
     }
-    
+
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=utf-8');
     }
@@ -168,20 +361,39 @@ sub process {
 
 =item config
 
-This allows your view subclass to pass additional settings to the
-TT config hash.
+This method allows your view subclass to pass additional settings to
+the TT configuration hash, or to set the C<CATALYST_VAR> and C<TIMER>
+options.
 
 =back
 
+=head2 HELPERS
+
+The L<Catalyst::Helper::View::TT> and
+L<Catalyst::Helper::View::TTSite> helper modules are provided to create
+your view module.  There are invoked by the F<myapp_create.pl> script:
+
+    $ script/myapp_create.pl view TT TT
+
+    $ script/myapp_create.pl view TT TTSite
+
+The L<Catalyst::Helper::View::TT> module creates a basic TT view
+module.  The L<Catalyst::Helper::View::TTSite> module goes a little
+further.  It also creates a default set of templates to get you
+started.  It also configures the view module to locate the templates
+automatically.
+
 =head1 SEE ALSO
 
-L<Catalyst>, L<Template::Manual>
+L<Catalyst>, L<Catalyst::Helper::View::TT>,
+L<Catalyst::Helper::View::TTSite>, L<Template::Manual>
 
 =head1 AUTHOR
 
 Sebastian Riedel, C<sri@cpan.org>
 Marcus Ramberg, C<mramberg@cpan.org>
 Jesse Sheidlower, C<jester@panix.com>
+Andy Wardley, C<abw@cpan.org>
 
 =head1 COPYRIGHT
 
