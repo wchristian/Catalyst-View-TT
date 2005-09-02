@@ -13,7 +13,7 @@ sub mk_compclass {
 sub mk_templates {
     my ( $self, $helper ) = @_;
     my $base = $helper->{base};
-    my $tdir = File::Spec->catfile( $base, 'templates' );
+    my $tdir = File::Spec->catfile( $base, 'root', 'templates' );
     my $ldir = File::Spec->catfile( $tdir, 'lib' );
     my $sdir = File::Spec->catfile( $tdir, 'src' );
 
@@ -122,22 +122,16 @@ package [% class %];
 
 use strict;
 use base 'Catalyst::View::TT';
-use NEXT;
 
-sub new {
-    my $self = shift;
-    my $c    = shift;
-    my $root     = $c->config->{ root };
-    my $template = $c->config->{ template } || { };
+my $root = [% app %]->config->root;
 
-    $template->{ CATALYST_VAR } ||= 'Catalyst',
-    $template->{ INCLUDE_PATH } ||= [ "$root/templates/src", "$root/templates/lib" ];
-    $template->{ PRE_PROCESS  } ||= 'config/main';
-    $template->{ WRAPPER      } ||= 'site/wrapper';
-    $template->{ ERROR        } ||= 'error.tt2';
-
-    return $self->NEXT::new($c, @_);
-}
+__PACKAGE__->config({
+    CATALYST_VAR => 'Catalyst',
+    INCLUDE_PATH => [ "$root/templates/src", "$root/templates/lib" ],
+    PRE_PROCESS  => 'config/main',
+    WRAPPER      => 'site/wrapper',
+    ERROR        => 'error.tt2'
+});
 
 =head1 NAME
 
