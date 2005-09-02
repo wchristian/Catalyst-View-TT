@@ -44,9 +44,9 @@ Catalyst::View::TT - Template View Class
 # render view from lib/MyApp.pm or lib/MyApp::C::SomeController.pm
     
     sub message : Global {
-        my ($self, $c) = @_;
-        $c->stash->{ template } = 'message.tt2';
-        $c->stash->{ message  } = 'Hello World!';
+        my ( $self, $c ) = @_;
+        $c->stash->{template} = 'message.tt2';
+        $c->stash->{message}  = 'Hello World!';
         $c->forward('MyApp::V::TT');
     }
 
@@ -94,7 +94,7 @@ to the TT view class.
     # In MyApp or MyApp::Controller::SomeController
     
     sub end : Private {
-        my($self, $c) = @_;
+        my( $self, $c ) = @_;
         $c->forward('MyApp::V::TT');
     }
 
@@ -133,9 +133,9 @@ performing any configuration.
         return $self->NEXT::new(@_);
     }
  
-The final, and perhaps most direct way, is to define a C<template>
+The final, and perhaps most direct way, is to define a class
 item in your main application configuration, again by calling the
-uniquitous C<config()> method.  The items in the C<template> hash are
+uniquitous C<config()> method.  The items in the class hash are
 added to those already defined by the above two methods.  This happens
 in the base class new() method (which is one reason why you must
 remember to call it via C<NEXT> if you redefine the C<new()> method in a
@@ -168,12 +168,12 @@ The view plugin renders the template specified in the C<template>
 item in the stash.  
 
     sub message : Global {
-        my ($self, $c) = @_;
-        $c->stash->{ template } = 'message.tt2';
+        my ( $self, $c ) = @_;
+        $c->stash->{template} = 'message.tt2';
         $c->forward('MyApp::V::TT');
     }
 
-If a C<template> item isn't defined, then it instead uses the
+If a class item isn't defined, then it instead uses the
 current match, as returned by C<$c-E<gt>match>.  In the above 
 example, this would be C<message>.
 
@@ -182,9 +182,9 @@ use as template variables.
 
 sub message : Global {
     sub default : Private {
-        my ($self, $c) = @_;
-        $c->stash->{ template } = 'message.tt2';
-        $c->stash->{ message  } = 'Hello World!';
+        my ( $self, $c ) = @_;
+        $c->stash->{template} = 'message.tt2';
+        $c->stash->{message}  = 'Hello World!';
         $c->forward('MyApp::V::TT');
     }
 
@@ -264,36 +264,36 @@ sub new {
 
     my $root = $c->config->{root};
 
-    my %config = (
+    my $config = {
         EVAL_PERL    => 0,
         INCLUDE_PATH => [ $root, "$root/base" ],
         %{ $class->config },
         %{$arguments}
-    );
+    };
 
     # if we're debugging and/or the TIMER option is set, then we install
     # Template::Timer as a custom CONTEXT object, but only if we haven't
     # already got a custom CONTEXT defined
 
-    if ( $config{TIMER} || ( $c->debug() && !exists $config{TIMER} ) ) {
-        if ( $config{CONTEXT} ) {
+    if ( $config->{TIMER} || ( $c->debug() && !exists $config->{TIMER} ) ) {
+        if ( $config->{CONTEXT} ) {
             $c->log->error(
                 'Cannot use Template::Timer - a TT CONFIG is already defined');
         }
         else {
-            $config{CONTEXT} = Template::Timer->new( \%config );
+            $config->{CONTEXT} = Template::Timer->new(%$config);
         }
     }
 
-    if ( $c->debug && $config{DUMP_CONFIG} ) {
+    if ( $c->debug && $config->{DUMP_CONFIG} ) {
         use Data::Dumper;
-        $c->log->debug( "TT Config: ", Dumper( \%config ) );
+        $c->log->debug( "TT Config: ", Dumper($config) );
     }
 
     return $class->NEXT::new(
         $c,
         {
-            template => Template->new( \%config ) || do {
+            template => Template->new($config) || do {
                 my $error = Template->error();
                 $c->log->error($error);
                 $c->error($error);

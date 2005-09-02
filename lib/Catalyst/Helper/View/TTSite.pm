@@ -55,18 +55,18 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
 # add something like the following to your main application module
 
     sub message : Global {
-        my ($self, $c) = @_;
-        $c->stash->{ template } = 'message.tt2';
-        $c->stash->{ message  } = $c->req->param('message') || 'Hello World';
+        my ( $self, $c ) = @_;
+        $c->stash->{template} = 'message.tt2';
+        $c->stash->{message}  = $c->req->param('message') || 'Hello World';
     }
     
     sub default : Private {
-        my ($self, $c) = @_;
-        $c->stash->{ template } = 'welcome.tt2';
+        my ( $self, $c ) = @_;
+        $c->stash->{template} = 'welcome.tt2';
     }
     
     sub end : Private {
-        my ($self, $c) = @_;
+        my ( $self, $c ) = @_;
         $c->forward('MyApp::V::TT');
     }
 
@@ -123,14 +123,15 @@ package [% class %];
 use strict;
 use base 'Catalyst::View::TT';
 
-my $root = [% app %]->config->root;
+my $root = [% app %]->config->{root};
 
 __PACKAGE__->config({
     CATALYST_VAR => 'Catalyst',
     INCLUDE_PATH => [ "$root/templates/src", "$root/templates/lib" ],
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',
-    ERROR        => 'error.tt2'
+    ERROR        => 'error.tt2',
+    TIMER        => 0
 });
 
 =head1 NAME
@@ -226,10 +227,10 @@ __config_url__
 __site_wrapper__
 [% TAGS star -%]
 [% IF template.name.match('\.(css|js|txt)');
-     debug("passing page through as text: $template.name");
+     debug("Passing page through as text: $template.name");
      content;
    ELSE;
-     debug("applying HTML page layout wrappers to $template.name\n");
+     debug("Applying HTML page layout wrappers to $template.name\n");
      content WRAPPER site/html + site/layout;
    END;
 -%]
