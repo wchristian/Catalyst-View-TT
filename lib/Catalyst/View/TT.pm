@@ -388,11 +388,14 @@ automatically.
 L<Catalyst>, L<Catalyst::Helper::View::TT>,
 L<Catalyst::Helper::View::TTSite>, L<Template::Manual>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Sebastian Riedel, C<sri@cpan.org>
+
 Marcus Ramberg, C<mramberg@cpan.org>
+
 Jesse Sheidlower, C<jester@panix.com>
+
 Andy Wardley, C<abw@cpan.org>
 
 =head1 COPYRIGHT
