@@ -12,10 +12,9 @@ sub mk_compclass {
 
 sub mk_templates {
     my ( $self, $helper ) = @_;
-    my $base = $helper->{base};
-    my $tdir = File::Spec->catfile( $base, 'root', 'templates' );
-    my $ldir = File::Spec->catfile( $tdir, 'lib' );
-    my $sdir = File::Spec->catfile( $tdir, 'src' );
+    my $base = $helper->{base},;
+    my $ldir = File::Spec->catfile( $base, 'root', 'lib' );
+    my $sdir = File::Spec->catfile( $base, 'root', 'src' );
 
     $helper->mk_dir($ldir);
     $helper->mk_dir($sdir);
@@ -57,7 +56,7 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
     sub message : Global {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
-        $c->stash->{message}  = $c->req->param('message') || 'Hello World';
+        $c->stash->{message}  ||= $c->req->param('message') || 'No message';
     }
     
     sub default : Private {
@@ -127,7 +126,7 @@ my $root = [% app %]->config->{root};
 
 __PACKAGE__->config({
     CATALYST_VAR => 'Catalyst',
-    INCLUDE_PATH => [ "$root/templates/src", "$root/templates/lib" ],
+    INCLUDE_PATH => [ "$root/src", "$root/lib" ],
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',
     ERROR        => 'error.tt2',
