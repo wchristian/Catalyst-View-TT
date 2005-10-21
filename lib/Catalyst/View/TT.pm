@@ -275,7 +275,7 @@ sub new {
     # Template::Timer as a custom CONTEXT object, but only if we haven't
     # already got a custom CONTEXT defined
 
-    if ( $config->{TIMER} || ( $c->debug() && !exists $config->{TIMER} ) ) {
+    if ( $config->{TIMER} ( {
         if ( $config->{CONTEXT} ) {
             $c->log->error(
                 'Cannot use Template::Timer - a TT CONFIG is already defined');
