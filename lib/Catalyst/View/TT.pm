@@ -26,7 +26,7 @@ Catalyst::View::TT - Template View Class
     MyApp->config({
         name     => 'MyApp',
         root     => $ROOT,
-        'MyApp::V::TT' => {
+        'V::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
               "$ROOT/templates/src", 
@@ -151,7 +151,7 @@ subclass).
     MyApp->config({
         name     => 'MyApp',
         root     => $ROOT,
-        'MyApp::V::TT' => {
+        'V::TT' => {
             INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
             PRE_PROCESS  => 'config/main',
             WRAPPER      => 'site/wrapper',
@@ -209,7 +209,7 @@ be referenced.
     MyApp->config({
         name     => 'MyApp',
         root     => $ROOT,
-        'MyApp::V::TT' => {
+        'V::TT' => {
             CATALYST_VAR => 'Catalyst',
         },
     });
@@ -243,7 +243,7 @@ You can suppress template profiling by setting the C<TIMER> configuration
 item to a false value.
 
     MyApp->config({
-        'MyApp::V::TT' => {
+        'V::TT' => {
             TIMER => 0,
         },
     });
