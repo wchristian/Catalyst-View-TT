@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::View::TT.
 
-0.14  TBR
+0.14  - Fri Oct 21 10:20:00 2005
         - Turn timer off by default, even for debug.
     	- removed superflous 'templates' inside 'root'
     	- made it possible to forward to the message action by
