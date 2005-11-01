@@ -2,7 +2,7 @@ Revision history for Perl extension Catalyst::View::TT.
 
 0.15  - TBR
         - Fix docs
-        - Added TEMPLATE_EXTENSION config variable 
+        - Added TEMPLATE_SUFFIX config variable 
 
 0.14  - Fri Oct 21 10:20:00 2005
         - Turn timer off by default, even for debug.
