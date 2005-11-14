@@ -27,8 +27,8 @@ Catalyst::View::TT - Template View Class
         'V::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
-              MyApp->path_to( 'root', 'templates', 'src' ), 
-              MyApp->path_to( 'root', 'templates', 'lib' ), 
+              MyApp->path_to( 'root', 'src' ), 
+              MyApp->path_to( 'root', 'lib' ), 
             ],
             PRE_PROCESS => 'config/main',
             WRAPPER     => 'site/wrapper',

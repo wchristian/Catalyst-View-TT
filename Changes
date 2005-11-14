@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::View::TT.
 
-0.15  - TBR
+0.15  - Mon Nov 14 14:43:00 2005
         - Updated for Catalyst 5.5
         - Fix docs
         - Added TEMPLATE_SUFFIX config variable 
