@@ -122,11 +122,12 @@ package [% class %];
 use strict;
 use base 'Catalyst::View::TT';
 
-my $root = [% app %]->config->{root};
-
 __PACKAGE__->config({
     CATALYST_VAR => 'Catalyst',
-    INCLUDE_PATH => [ "$root/src", "$root/lib" ],
+    INCLUDE_PATH => [
+        MyApp->path_to( 'root', 'src' )
+        MyApp->path_to( 'root', 'lib' )
+    ],
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',
     ERROR        => 'error.tt2',
@@ -135,7 +136,7 @@ __PACKAGE__->config({
 
 =head1 NAME
 
-[% class %] - TT View Component
+[% class %] - Catalyst TTSite View
 
 =head1 SYNOPSIS
 
@@ -143,7 +144,7 @@ See L<[% app %]>
 
 =head1 DESCRIPTION
 
-TT View Component.
+Catalyst TTSite View.
 
 =head1 AUTHOR
 
@@ -151,8 +152,8 @@ TT View Component.
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify
-it under the same terms as perl itself.
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 
