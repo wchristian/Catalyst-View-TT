@@ -1,7 +1,7 @@
 package Catalyst::View::TT;
 
 use strict;
-use base qw/Catalyst::Base/;
+use base qw/Catalyst::View/;
 use Template;
 use Template::Timer;
 use NEXT;
@@ -21,16 +21,14 @@ Catalyst::View::TT - Template View Class
 
 # configure in lib/MyApp.pm
 
-    our $ROOT = '/home/dent/catalyst/MyApp';
-
     MyApp->config({
         name     => 'MyApp',
-        root     => $ROOT,
+        root     => MyApp->path_to('root');,
         'V::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
-              "$ROOT/templates/src", 
-              "$ROOT/templates/lib"
+              MyApp->path_to( 'root', 'templates', 'src' ), 
+              MyApp->path_to( 'root', 'templates', 'lib' ), 
             ],
             PRE_PROCESS => 'config/main',
             WRAPPER     => 'site/wrapper',
@@ -110,10 +108,11 @@ happens when the module is first loaded.
     use strict;
     use base 'Catalyst::View::TT';
 
-    our $ROOT = '/home/dent/catalyst/MyApp';
-    
     MyApp::V::TT->config({
-        INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+        INCLUDE_PATH => [
+            MyApp->path_to( 'root', 'templates', 'lib' ),
+            MyApp->path_to( 'root', 'templates', 'src' ),
+        ],
         PRE_PROCESS  => 'config/main',
         WRAPPER      => 'site/wrapper',
     });
@@ -127,7 +126,10 @@ performing any configuration.
     sub new {
         my $self = shift;
         $self->config({
-            INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+            INCLUDE_PATH => [
+                MyApp->path_to( 'root', 'templates', 'lib' ),
+                MyApp->path_to( 'root', 'templates', 'src' ),
+            ],
             PRE_PROCESS  => 'config/main',
             WRAPPER      => 'site/wrapper',
         });
@@ -147,13 +149,14 @@ subclass).
     use strict;
     use Catalyst;
     
-    our $ROOT = '/home/dent/catalyst/MyApp';
-    
     MyApp->config({
         name     => 'MyApp',
-        root     => $ROOT,
+        root     => MyApp->path_to('root'),
         'V::TT' => {
-            INCLUDE_PATH => ["$ROOT/templates/src", "$ROOT/templates/lib"],
+            INCLUDE_PATH => [
+                MyApp->path_to( 'root', 'templates', 'lib' ),
+                MyApp->path_to( 'root', 'templates', 'src' ),
+            ],
             PRE_PROCESS  => 'config/main',
             WRAPPER      => 'site/wrapper',
         },
@@ -226,9 +229,9 @@ sub new {
     my $root = $c->config->{root};
 
     my $config = {
-        EVAL_PERL    => 0,
+        EVAL_PERL          => 0,
         TEMPLATE_EXTENSION => '',
-        INCLUDE_PATH => [ $root, "$root/base" ],
+        INCLUDE_PATH       => [ $root, "$root/base" ],
         %{ $class->config },
         %{$arguments}
     };
@@ -282,7 +285,8 @@ Output is stored in C<$c-E<gt>response-E<gt>output>.
 sub process {
     my ( $self, $c ) = @_;
 
-    my $template = $c->stash->{template} || $c->request->match . $self->config->{TEMPLATE_EXTENSION};
+    my $template = $c->stash->{template}
+      || $c->request->match . $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
@@ -337,7 +341,7 @@ For example:
 
     MyApp->config({
         name     => 'MyApp',
-        root     => $ROOT,
+        root     => MyApp->path_to('root'),
         'V::TT' => {
             CATALYST_VAR => 'Catalyst',
         },

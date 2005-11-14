@@ -54,7 +54,7 @@ use base 'Catalyst::View::TT';
 
 =head1 NAME
 
-[% class %] - TT View Component
+[% class %] - Catalyst TT View
 
 =head1 SYNOPSIS
 
@@ -62,7 +62,7 @@ See L<[% app %]>
 
 =head1 DESCRIPTION
 
-TT View Component.
+Catalyst TT View.
 
 =head1 AUTHOR
 
@@ -70,8 +70,8 @@ TT View Component.
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify
-it under the same terms as perl itself.
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 
