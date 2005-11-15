@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -32,7 +32,7 @@ Catalyst::View::TT - Template View Class
             ],
             PRE_PROCESS => 'config/main',
             WRAPPER     => 'site/wrapper',
-	    TEMPLATE_SUFFIX => '.tt',
+	    TEMPLATE_EXTENSION => '.tt',
 
             # two optional config items
             CATALYST_VAR => 'Catalyst',
@@ -264,7 +264,8 @@ sub new {
                 $c->error($error);
                 return undef;
               }
-        }
+        },
+        %{$config},
     );
 }
 
@@ -370,7 +371,7 @@ output from your templates, such as:
     <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
 
 
-=item C<TEMPLATE_SUFFIX>
+=item C<TEMPLATE_EXTENSION>
 
 a sufix to add when looking for templates bases on the C<match> method in L<Catalyst::Request>.
 
