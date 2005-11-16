@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -255,7 +255,7 @@ sub new {
         $c->log->debug( "TT Config: ", Dumper($config) );
     }
 
-    return $class->NEXT::new(
+    my $self = $class->NEXT::new(
         $c,
         {
             template => Template->new($config) || do {
@@ -267,6 +267,9 @@ sub new {
         },
         %{$config},
     );
+    $self->config($config);
+
+    return $self;
 }
 
 =item process

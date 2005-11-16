@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.18  - Mon Nov 14 20:43:00 2005
+        - Fixed more typos
+
 0.17  - Mon Nov 14 20:43:00 2005
         - Fixed some typos
 
