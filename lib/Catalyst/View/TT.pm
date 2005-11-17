@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -263,9 +263,9 @@ sub new {
                 $c->log->error($error);
                 $c->error($error);
                 return undef;
-              }
-        },
+              },
         %{$config},
+        },
     );
     $self->config($config);
 
