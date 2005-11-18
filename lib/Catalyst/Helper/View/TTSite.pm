@@ -125,8 +125,8 @@ use base 'Catalyst::View::TT';
 __PACKAGE__->config({
     CATALYST_VAR => 'Catalyst',
     INCLUDE_PATH => [
-        MyApp->path_to( 'root', 'src' )
-        MyApp->path_to( 'root', 'lib' )
+        [% app %]->path_to( 'root', 'src' ),
+        [% app %]->path_to( 'root', 'lib' )
     ],
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',
