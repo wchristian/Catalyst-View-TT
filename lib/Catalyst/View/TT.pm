@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 __PACKAGE__->mk_accessors('template');
 
@@ -30,9 +30,9 @@ Catalyst::View::TT - Template View Class
               MyApp->path_to( 'root', 'src' ), 
               MyApp->path_to( 'root', 'lib' ), 
             ],
-            PRE_PROCESS => 'config/main',
-            WRAPPER     => 'site/wrapper',
-	    TEMPLATE_EXTENSION => '.tt',
+            PRE_PROCESS        => 'config/main',
+            WRAPPER            => 'site/wrapper',
+            TEMPLATE_EXTENSION => '.tt',
 
             # two optional config items
             CATALYST_VAR => 'Catalyst',
