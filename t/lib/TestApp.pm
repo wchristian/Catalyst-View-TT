@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Catalyst; # qw/-Debug/;
+use Path::Class;
 
 our $VERSION = '0.01';
 
@@ -30,6 +31,16 @@ sub test : Local {
     my ($self, $c) = @_;
 
     $c->stash->{message} = ($c->request->param('message') || $c->config->{default_message});
+}
+
+sub test_includepath : Local {
+    my ($self, $c) = @_;
+    $c->stash->{message} = ($c->request->param('message') || $c->config->{default_message});
+    $c->stash->{template} = $c->request->param('template');
+    if ( $c->request->param('additionalpath') ){
+        my $additionalpath = Path::Class::dir($c->config->{root}, $c->request->param('additionalpath'));
+        $c->stash->{additional_template_paths} = ["$additionalpath"];
+    }
 }
 
 sub end : Private {

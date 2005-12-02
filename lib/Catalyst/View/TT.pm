@@ -9,6 +9,7 @@ use NEXT;
 our $VERSION = '0.20';
 
 __PACKAGE__->mk_accessors('template');
+__PACKAGE__->mk_accessors('include_path');
 
 =head1 NAME
 
@@ -166,6 +167,15 @@ Note that any configuration items defined by one of the earlier
 methods will be overwritten by items of the same name provided by the
 latter methods.  
 
+=head2 DYNAMIC INCLUDE_PATH
+
+It is sometimes needed to dynamically add additional paths to the 
+INCLUDE_PATH variable of the template object. This can be done by setting
+'additional_include_paths' on stash to a referrence to an array with 
+additional paths:
+
+    $c->stash->{additional_template_paths} = [$c->config->{root} . '/test_include_path']; 
+
 =head2 RENDERING VIEWS
 
 The view plugin renders the template specified in the C<template>
@@ -223,17 +233,38 @@ and reads the application config.
 
 =cut
 
+sub coerce_paths {
+    my ( $paths, $dlim ) = shift;
+    return () if ( ! $paths );
+    return @{$paths} if ( ref $paths eq 'ARRAY');
+    if ( ! ref $paths ){
+            # tweak delim to ignore C:/
+            unless (defined $dlim) {
+                $dlim = ($^O eq 'MSWin32') ? ':(?!\\/)' : ':';
+            }
+            return split(/$dlim/, $paths);
+    }
+}
+
+
 sub new {
     my ( $class, $c, $arguments ) = @_;
-
-    my $root = $c->config->{root};
-
+    my $delim = $class->config->{DELIMITER} || $arguments->{DELIMITER};
+    my @include_path = coerce_paths($arguments->{INCLUDE_PATH}, $delim); 
+    if(!@include_path){
+        @include_path = coerce_paths($class->config->{INCLUDE_PATH}, $delim);
+    }
+    if(!@include_path){
+        my $root = $c->config->{root};
+        my $base = Path::Class::dir($root, 'base');
+        @include_path = ( "$root", "$base" );
+    }
     my $config = {
         EVAL_PERL          => 0,
         TEMPLATE_EXTENSION => '',
-        INCLUDE_PATH       => [ $root, "$root/base" ],
         %{ $class->config },
-        %{$arguments}
+        %{$arguments},
+        INCLUDE_PATH => \@include_path,
     };
 
     # if we're debugging and/or the TIMER option is set, then we install
@@ -267,6 +298,7 @@ sub new {
         %{$config},
         },
     );
+    $self->include_path(\@include_path);
     $self->config($config);
 
     return $self;
@@ -311,7 +343,9 @@ sub process {
         ),
         %{ $c->stash() }
     };
-
+    
+    my @tmp_path = @{$self->include_path};
+    unshift @{$self->include_path}, @{$c->stash->{additional_template_paths}} if ref $c->stash->{additional_template_paths};
     unless ( $self->template->process( $template, $vars, \$output ) ) {
         my $error = $self->template->error;
         $error = qq/Couldn't render template "$error"/;
@@ -319,7 +353,8 @@ sub process {
         $c->error($error);
         return 0;
     }
-
+    @{$self->include_path} = @tmp_path if ref $c->stash->{additional_template_paths};
+   
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=utf-8');
     }
