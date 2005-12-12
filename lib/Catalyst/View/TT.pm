@@ -233,7 +233,7 @@ and reads the application config.
 
 =cut
 
-sub coerce_paths {
+sub _coerce_paths {
     my ( $paths, $dlim ) = shift;
     return () if ( ! $paths );
     return @{$paths} if ( ref $paths eq 'ARRAY');
@@ -250,9 +250,9 @@ sub coerce_paths {
 sub new {
     my ( $class, $c, $arguments ) = @_;
     my $delim = $class->config->{DELIMITER} || $arguments->{DELIMITER};
-    my @include_path = coerce_paths($arguments->{INCLUDE_PATH}, $delim); 
+    my @include_path = _coerce_paths($arguments->{INCLUDE_PATH}, $delim); 
     if(!@include_path){
-        @include_path = coerce_paths($class->config->{INCLUDE_PATH}, $delim);
+        @include_path = _coerce_paths($class->config->{INCLUDE_PATH}, $delim);
     }
     if(!@include_path){
         my $root = $c->config->{root};
