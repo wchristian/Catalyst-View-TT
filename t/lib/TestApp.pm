@@ -41,6 +41,13 @@ sub test_includepath : Local {
         my $additionalpath = Path::Class::dir($c->config->{root}, $c->request->param('additionalpath'));
         $c->stash->{additional_template_paths} = ["$additionalpath"];
     }
+    if ( $c->request->param('addpath') ){
+        my $additionalpath = Path::Class::dir($c->config->{root}, $c->request->param('addpath'));
+        my $view = 'TestApp::View::TT::' . ($c->request->param('view') || $c->config->{default_view});
+        no strict "refs";
+        push @{$view . '::include_path'}, "$additionalpath";
+        use strict;
+    }
 }
 
 sub end : Private {

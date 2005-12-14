@@ -237,34 +237,40 @@ sub _coerce_paths {
     my ( $paths, $dlim ) = shift;
     return () if ( ! $paths );
     return @{$paths} if ( ref $paths eq 'ARRAY');
-    if ( ! ref $paths ){
             # tweak delim to ignore C:/
             unless (defined $dlim) {
                 $dlim = ($^O eq 'MSWin32') ? ':(?!\\/)' : ':';
             }
             return split(/$dlim/, $paths);
-    }
 }
 
 
 sub new {
     my ( $class, $c, $arguments ) = @_;
     my $delim = $class->config->{DELIMITER} || $arguments->{DELIMITER};
-    my @include_path = _coerce_paths($arguments->{INCLUDE_PATH}, $delim); 
-    if(!@include_path){
-        @include_path = _coerce_paths($class->config->{INCLUDE_PATH}, $delim);
-    }
-    if(!@include_path){
-        my $root = $c->config->{root};
-        my $base = Path::Class::dir($root, 'base');
-        @include_path = ( "$root", "$base" );
+    my $include_path;
+    if(ref $arguments->{INCLUDE_PATH} eq 'ARRAY'){
+        $include_path = $arguments->{INCLUDE_PATH};
+    }elsif(ref $class->config->{INCLUDE_PATH} eq 'ARRAY'){
+        $include_path = $class->config->{INCLUDE_PATH};
+    }else{
+        my @include_path = _coerce_paths($arguments->{INCLUDE_PATH}, $delim);
+        if(!@include_path){
+            @include_path = _coerce_paths($class->config->{INCLUDE_PATH}, $delim);
+        }
+        if(!@include_path){
+            my $root = $c->config->{root};
+            my $base = Path::Class::dir($root, 'base');
+            @include_path = ( "$root", "$base" );
+        }
+        $include_path = \@include_path;
     }
     my $config = {
         EVAL_PERL          => 0,
         TEMPLATE_EXTENSION => '',
         %{ $class->config },
         %{$arguments},
-        INCLUDE_PATH => \@include_path,
+        INCLUDE_PATH => $include_path,
     };
 
     # if we're debugging and/or the TIMER option is set, then we install
@@ -298,7 +304,7 @@ sub new {
         %{$config},
         },
     );
-    $self->include_path(\@include_path);
+    $self->include_path($include_path);
     $self->config($config);
 
     return $self;
@@ -344,8 +350,6 @@ sub process {
         ),
         %{ $c->stash() }
     };
-    
-    my @tmp_path = @{$self->include_path};
     unshift @{$self->include_path}, @{$c->stash->{additional_template_paths}} if ref $c->stash->{additional_template_paths};
     unless ( $self->template->process( $template, $vars, \$output ) ) {
         my $error = $self->template->error;
@@ -354,7 +358,7 @@ sub process {
         $c->error($error);
         return 0;
     }
-    @{$self->include_path} = @tmp_path if ref $c->stash->{additional_template_paths};
+    splice @{$self->include_path}, 0, scalar @{$c->stash->{additional_template_paths}} if ref $c->stash->{additional_template_paths};
    
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=utf-8');
