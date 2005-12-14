@@ -235,32 +235,36 @@ and reads the application config.
 
 sub _coerce_paths {
     my ( $paths, $dlim ) = shift;
-    return () if ( ! $paths );
-    return @{$paths} if ( ref $paths eq 'ARRAY');
-            # tweak delim to ignore C:/
-            unless (defined $dlim) {
-                $dlim = ($^O eq 'MSWin32') ? ':(?!\\/)' : ':';
-            }
-            return split(/$dlim/, $paths);
-}
+    return () if ( !$paths );
+    return @{$paths} if ( ref $paths eq 'ARRAY' );
 
+    # tweak delim to ignore C:/
+    unless ( defined $dlim ) {
+        $dlim = ( $^O eq 'MSWin32' ) ? ':(?!\\/)' : ':';
+    }
+    return split( /$dlim/, $paths );
+}
 
 sub new {
     my ( $class, $c, $arguments ) = @_;
     my $delim = $class->config->{DELIMITER} || $arguments->{DELIMITER};
     my $include_path;
-    if(ref $arguments->{INCLUDE_PATH} eq 'ARRAY'){
+    if ( ref $arguments->{INCLUDE_PATH} eq 'ARRAY' ) {
         $include_path = $arguments->{INCLUDE_PATH};
-    }elsif(ref $class->config->{INCLUDE_PATH} eq 'ARRAY'){
+    }
+    elsif ( ref $class->config->{INCLUDE_PATH} eq 'ARRAY' ) {
         $include_path = $class->config->{INCLUDE_PATH};
-    }else{
-        my @include_path = _coerce_paths($arguments->{INCLUDE_PATH}, $delim);
-        if(!@include_path){
-            @include_path = _coerce_paths($class->config->{INCLUDE_PATH}, $delim);
+    }
+    else {
+        my @include_path
+            = _coerce_paths( $arguments->{INCLUDE_PATH}, $delim );
+        if ( !@include_path ) {
+            @include_path
+                = _coerce_paths( $class->config->{INCLUDE_PATH}, $delim );
         }
-        if(!@include_path){
+        if ( !@include_path ) {
             my $root = $c->config->{root};
-            my $base = Path::Class::dir($root, 'base');
+            my $base = Path::Class::dir( $root, 'base' );
             @include_path = ( "$root", "$base" );
         }
         $include_path = \@include_path;
@@ -280,7 +284,8 @@ sub new {
     if ( $config->{TIMER} ) {
         if ( $config->{CONTEXT} ) {
             $c->log->error(
-                'Cannot use Template::Timer - a TT CONFIG is already defined');
+                'Cannot use Template::Timer - a TT CONFIG is already defined'
+            );
         }
         else {
             $config->{CONTEXT} = Template::Timer->new(%$config);
@@ -294,14 +299,13 @@ sub new {
 
     my $self = $class->NEXT::new(
         $c,
-        {
-            template => Template->new($config) || do {
+        {   template => Template->new($config) || do {
                 my $error = Template->error();
                 $c->log->error($error);
                 $c->error($error);
                 return undef;
-              },
-        %{$config},
+            },
+            %{$config},
         },
     );
     $self->include_path($include_path);
@@ -328,8 +332,8 @@ sub process {
     my ( $self, $c ) = @_;
 
     my $template = $c->stash->{template}
-      || ( $c->request->match || $c->request->action ) . 
-           $self->config->{TEMPLATE_EXTENSION};
+        || ( $c->request->match || $c->request->action )
+        . $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
@@ -343,14 +347,15 @@ sub process {
     my $vars = {
         defined $cvar
         ? ( $cvar => $c )
-        : (
-            c    => $c,
+        : ( c    => $c,
             base => $c->req->base,
             name => $c->config->{name}
         ),
         %{ $c->stash() }
     };
-    unshift @{$self->include_path}, @{$c->stash->{additional_template_paths}} if ref $c->stash->{additional_template_paths};
+    unshift @{ $self->include_path },
+        @{ $c->stash->{additional_template_paths} }
+        if ref $c->stash->{additional_template_paths};
     unless ( $self->template->process( $template, $vars, \$output ) ) {
         my $error = $self->template->error;
         $error = qq/Couldn't render template "$error"/;
@@ -358,8 +363,10 @@ sub process {
         $c->error($error);
         return 0;
     }
-    splice @{$self->include_path}, 0, scalar @{$c->stash->{additional_template_paths}} if ref $c->stash->{additional_template_paths};
-   
+    splice @{ $self->include_path }, 0,
+        scalar @{ $c->stash->{additional_template_paths} }
+        if ref $c->stash->{additional_template_paths};
+
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=utf-8');
     }

@@ -1,8 +1,9 @@
 Revision history for Perl extension Catalyst::View::TT.
 
 0.21	
-	- Fixed dynamic include bugs and added tests.
-0.20
+        - Fixed dynamic include bugs and added tests. (Zbigniew Lukasiak)
+
+0.20    Mon Dec 12 03:35:00 2005
         - Fall back to action (default/index returns blank on match)
         - Added tests. (Daniel Westermann-Clark)
         - Fixed TTSite helper to use correct app name.
