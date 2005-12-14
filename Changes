@@ -1,6 +1,7 @@
 Revision history for Perl extension Catalyst::View::TT.
 
 0.20
+        - Fall back to action (default/index returns blank on match)
         - Added tests. (Daniel Westermann-Clark)
         - Fixed TTSite helper to use correct app name.
         - Added support for dynamic includes.

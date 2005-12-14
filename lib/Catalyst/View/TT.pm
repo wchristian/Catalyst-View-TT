@@ -322,7 +322,8 @@ sub process {
     my ( $self, $c ) = @_;
 
     my $template = $c->stash->{template}
-      || $c->request->match . $self->config->{TEMPLATE_EXTENSION};
+      || ( $c->request->match || $c->request->action ) . 
+           $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
