@@ -247,35 +247,25 @@ sub _coerce_paths {
 
 sub new {
     my ( $class, $c, $arguments ) = @_;
-    my $delim = $class->config->{DELIMITER} || $arguments->{DELIMITER};
-    my $include_path;
-    if ( ref $arguments->{INCLUDE_PATH} eq 'ARRAY' ) {
-        $include_path = $arguments->{INCLUDE_PATH};
-    }
-    elsif ( ref $class->config->{INCLUDE_PATH} eq 'ARRAY' ) {
-        $include_path = $class->config->{INCLUDE_PATH};
-    }
-    else {
-        my @include_path
-            = _coerce_paths( $arguments->{INCLUDE_PATH}, $delim );
-        if ( !@include_path ) {
-            @include_path
-                = _coerce_paths( $class->config->{INCLUDE_PATH}, $delim );
-        }
-        if ( !@include_path ) {
-            my $root = $c->config->{root};
-            my $base = Path::Class::dir( $root, 'base' );
-            @include_path = ( "$root", "$base" );
-        }
-        $include_path = \@include_path;
-    }
     my $config = {
         EVAL_PERL          => 0,
         TEMPLATE_EXTENSION => '',
         %{ $class->config },
         %{$arguments},
-        INCLUDE_PATH => $include_path,
     };
+    if ( ! (ref $config->{INCLUDE_PATH} eq 'ARRAY') ) {
+        my $delim = $config->{DELIMITER};
+        my @include_path
+            = _coerce_paths( $config->{INCLUDE_PATH}, $delim );
+        if ( !@include_path ) {
+            my $root = $c->config->{root};
+            my $base = Path::Class::dir( $root, 'base' );
+            @include_path = ( "$root", "$base" );
+        }
+        $config->{INCLUDE_PATH} = \@include_path;
+    }
+
+
 
     # if we're debugging and/or the TIMER option is set, then we install
     # Template::Timer as a custom CONTEXT object, but only if we haven't
@@ -308,7 +298,7 @@ sub new {
             %{$config},
         },
     );
-    $self->include_path($include_path);
+    $self->include_path($config->{INCLUDE_PATH});
     $self->config($config);
 
     return $self;
