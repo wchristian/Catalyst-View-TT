@@ -322,8 +322,8 @@ sub process {
     my ( $self, $c ) = @_;
 
     my $template = $c->stash->{template}
-        || ( $c->request->match || $c->request->action )
-        . $self->config->{TEMPLATE_EXTENSION};
+      || ( $c->request->match || $c->request->action )
+      . $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
@@ -333,19 +333,11 @@ sub process {
     $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
 
     my $output;
-    my $cvar = $self->config->{CATALYST_VAR};
-    my $vars = {
-        defined $cvar
-        ? ( $cvar => $c )
-        : ( c    => $c,
-            base => $c->req->base,
-            name => $c->config->{name}
-        ),
-        %{ $c->stash() }
-    };
+    my $vars = { $self->template_vars($c) };
+
     unshift @{ $self->include_path },
-        @{ $c->stash->{additional_template_paths} }
-        if ref $c->stash->{additional_template_paths};
+      @{ $c->stash->{additional_template_paths} }
+      if ref $c->stash->{additional_template_paths};
     unless ( $self->template->process( $template, $vars, \$output ) ) {
         my $error = $self->template->error;
         $error = qq/Couldn't render template "$error"/;
@@ -354,8 +346,8 @@ sub process {
         return 0;
     }
     splice @{ $self->include_path }, 0,
-        scalar @{ $c->stash->{additional_template_paths} }
-        if ref $c->stash->{additional_template_paths};
+      scalar @{ $c->stash->{additional_template_paths} }
+      if ref $c->stash->{additional_template_paths};
 
     unless ( $c->response->content_type ) {
         $c->response->content_type('text/html; charset=utf-8');
@@ -366,6 +358,28 @@ sub process {
     return 1;
 }
 
+=item template_vars
+
+Returns a list of keys/values to be used as the variables in the
+template.
+
+=cut
+
+sub template_vars {
+    my ( $self, $c ) = @_;
+
+    my $cvar = $self->config->{CATALYST_VAR};
+
+    defined $cvar
+      ? ( $cvar => $c )
+      : (
+        c    => $c,
+        base => $c->req->base,
+        name => $c->config->{name}
+      ),
+      %{ $c->stash() }
+
+}
 =item config
 
 This method allows your view subclass to pass additional settings to
