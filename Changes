@@ -1,6 +1,7 @@
 Revision history for Perl extension Catalyst::View::TT.
 
 0.21	
+        - Added Template::Provider support (Jess Robinson)
         - Fixed dynamic include bugs and added tests. (Zbigniew Lukasiak)
 
 0.20    Mon Dec 12 03:35:00 2005
