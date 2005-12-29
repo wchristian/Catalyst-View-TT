@@ -22,10 +22,10 @@ Catalyst::View::TT - Template View Class
 
 # configure in lib/MyApp.pm
 
-    MyApp->config({
+    MyApp->config(
         name     => 'MyApp',
         root     => MyApp->path_to('root');,
-        'V::TT' => {
+        'View::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
               MyApp->path_to( 'root', 'src' ), 
@@ -39,7 +39,7 @@ Catalyst::View::TT - Template View Class
             CATALYST_VAR => 'Catalyst',
             TIMER        => 1,
         },
-    });
+    );
          
 # render view from lib/MyApp.pm or lib/MyApp::C::SomeController.pm
     
