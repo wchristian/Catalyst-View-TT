@@ -169,12 +169,28 @@ latter methods.
 
 =head2 DYNAMIC INCLUDE_PATH
 
-It is sometimes needed to dynamically add additional paths to the 
-INCLUDE_PATH variable of the template object. This can be done by setting
-'additional_include_paths' on stash to a referrence to an array with 
-additional paths:
+Sometimes it is desirable to modify INCLUDE_PATH for your templates at run time.
+ 
+Additional paths can be added to the start of INCLUDE_PATH via the stash as
+follows:
 
-    $c->stash->{additional_template_paths} = [$c->config->{root} . '/test_include_path']; 
+    $c->stash->{additional_template_paths} =
+        [$c->config->{root} . '/test_include_path'];
+
+If you need to add paths to the end of INCLUDE_PATH, there is also an
+include_path() accessor available:
+
+    push( @{ $c->view('TT')->include_path }, qw/path/ );
+
+Note that if you use include_path() to add extra paths to INCLUDE_PATH, you
+MUST check for duplicate paths. Without such checking, the above code will add
+"path" to INCLUDE_PATH at every request, causing a memory leak.
+
+A safer approach is to use include_path() to overwrite the array of paths
+rather than adding to it. This eliminates both the need to perform duplicate
+checking and the chance of a memory leak:
+
+    @{ $c->view('TT')->include_path } = qw/path another_path/;
 
 =head2 RENDERING VIEWS
 
