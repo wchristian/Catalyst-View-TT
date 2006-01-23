@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -339,10 +339,10 @@ sub new {
 =item process
 
 Renders the template specified in C<$c-E<gt>stash-E<gt>{template}> or
-C<$c-E<gt>request-E<gt>match>. Template variables are set up from the
-contents of C<$c-E<gt>stash>, augmented with C<base> set to
-C<$c-E<gt>req-E<gt>base>, C<c> to C<$c> and C<name> to
-C<$c-E<gt>config-E<gt>{name}>. Alternately, the C<CATALYST_VAR>
+C<$c-E<gt>action> (the private name of the matched action. 
+Template variables are set up from the contents of C<$c-E<gt>stash>, 
+augmented with C<base> set to C<$c-E<gt>req-E<gt>base>, C<c> to C<$c> and 
+C<name> to C<$c-E<gt>config-E<gt>{name}>. Alternately, the C<CATALYST_VAR>
 configuration item can be defined to specify the name of a template
 variable through which the context reference (C<$c>) can be accessed.
 In this case, the C<c>, C<base> and C<name> variables are omitted.
@@ -354,8 +354,7 @@ sub process {
     my ( $self, $c ) = @_;
 
     my $template = $c->stash->{template}
-      || ( $c->request->match || $c->request->action )
-      . $self->config->{TEMPLATE_EXTENSION};
+      ||  $c->action . $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
