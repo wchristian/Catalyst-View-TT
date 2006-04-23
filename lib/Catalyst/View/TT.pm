@@ -333,7 +333,6 @@ sub new {
     }
     if ( $config->{PROVIDERS} ) {
         my @providers = ();
-        print STDERR "PROVIDERS";
         if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
             foreach my $p (@{$config->{PROVIDERS}}) {
                 my $pname = $p->{name};
@@ -354,7 +353,6 @@ sub new {
                 {
                     $c->log->warn("Can't load $prov, ($@)");
                 }
-                print STDERR "Loaded $prov";
             }
         }
         delete $config->{PROVIDERS};
