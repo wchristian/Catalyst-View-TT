@@ -1,6 +1,7 @@
 Revision history for Perl extension Catalyst::View::TT.
 
 0.22	Fri Dec 16 18:25:00 2005
+	- Added render suport. (Ash Berlin)
 	- stringify $c->action for automatic template match instead of $c->req->action.
 	  * NOTE * This will change the match to the private name of the matched action! if you
 	  use template_suffix you have to move your templates around!
