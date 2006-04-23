@@ -6,7 +6,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -360,8 +360,12 @@ sub new {
     # Creation of template outside of call to new so that we can pass [ $self ]
     # as INCLUDE_PATH config item, which then gets ->paths() called to get list
     # of include paths to search for templates.
+   
+    # Use a weakend copy of self so we dont have loops preventing GC from working
+    my $copy = $self;
+    Scalar::Util::weaken($copy);
+    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
     
-    $config->{INCLUDE_PATH} = [ $self ];
     $self->{template} = 
         Template->new($config) || do {
             my $error = Template->error();
