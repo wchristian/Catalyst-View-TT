@@ -333,13 +333,28 @@ sub new {
     }
     if ( $config->{PROVIDERS} ) {
         my @providers = ();
+        print STDERR "PROVIDERS";
         if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
             foreach my $p (@{$config->{PROVIDERS}}) {
                 my $pname = $p->{name};
-                eval "require Template::Provider::$pname";
-                if(!$@) {
-                    push @providers, "Template::Provider::${pname}"->new($p->{args});
+                my $prov = 'Template::Provider';
+                if($pname eq '_file_')
+                {
+                    $p->{args} = { %$config };
                 }
+                else
+                {
+                    $prov .="::$pname" if($pname ne '_file_');
+                }
+                eval "require $prov";
+                if(!$@) {
+                    push @providers, "$prov"->new($p->{args});
+                }
+                else
+                {
+                    $c->log->warn("Can't load $prov, ($@)");
+                }
+                print STDERR "Loaded $prov";
             }
         }
         delete $config->{PROVIDERS};
