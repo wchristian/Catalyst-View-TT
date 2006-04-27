@@ -13,6 +13,7 @@ t/04pkgconfig.t
 t/05appconfig.t
 t/06includepath.t
 t/07render.t
+t/08cycle.t
 t/lib/TestApp.pm
 t/lib/TestApp/root/specified_template.tt
 t/lib/TestApp/root/test.tt

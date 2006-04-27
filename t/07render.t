@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -15,3 +15,8 @@ my $message = 'Dynamic message';
 
 ok(($response = request("/test_msg?msg=$message"))->is_success, 'request ok');
 is($response->content, "$message", 'message ok');
+
+$response = request("/test_render?template=non_existant_template.tt");
+
+is (403, $response->code, 'request returned error');
+is($response->content, 'file error - non_existant_template.tt: not found', 'Error from non-existant-template');

@@ -6,10 +6,12 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
+
+*paths = \&include_path;
 
 =head1 NAME
 
@@ -193,7 +195,7 @@ checking and the chance of a memory leak:
     @{ $c->view('TT')->include_path } = qw/path another_path/;
 
 If you are calling C<render> directly then you can specify dynamic paths by 
-having a C<additional_include_paths> key with a value of additonal directories
+having a C<additional_template_paths> key with a value of additonal directories
 to search. See L<CAPTURING TEMPLATE OUTPUT> for an example showing this.
 
 =head2 RENDERING VIEWS
@@ -253,7 +255,7 @@ L<Catalyst::Plugin::Email> and the L<render> method:
         Subject => 'A TT Email',
       ],
       body => $c->view('TT')->render($c, 'email.tt', {
-        additional_include_paths => [ $c->config->{root} . '/email_templates'],
+        additional_template_paths => [ $c->config->{root} . '/email_templates'],
         email_tmpl_param1 => 'foo'
         }
       ),
@@ -296,9 +298,10 @@ sub new {
         %{ $class->config },
         %{$arguments},
     };
-    if ( !( ref $config->{INCLUDE_PATH} eq 'ARRAY' ) ) {
+    if ( ! (ref $config->{INCLUDE_PATH} eq 'ARRAY') ) {
         my $delim = $config->{DELIMITER};
-        my @include_path = _coerce_paths( $config->{INCLUDE_PATH}, $delim );
+        my @include_path
+            = _coerce_paths( $config->{INCLUDE_PATH}, $delim );
         if ( !@include_path ) {
             my $root = $c->config->{root};
             my $base = Path::Class::dir( $root, 'base' );
@@ -306,6 +309,8 @@ sub new {
         }
         $config->{INCLUDE_PATH} = \@include_path;
     }
+
+
 
     # if we're debugging and/or the TIMER option is set, then we install
     # Template::Timer as a custom CONTEXT object, but only if we haven't
@@ -328,36 +333,60 @@ sub new {
     }
     if ( $config->{PROVIDERS} ) {
         my @providers = ();
-        if ( ref( $config->{PROVIDERS} ) eq 'ARRAY' ) {
-            foreach my $p ( @{ $config->{PROVIDERS} } ) {
+        if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
+            foreach my $p (@{$config->{PROVIDERS}}) {
                 my $pname = $p->{name};
-                eval "require Template::Provider::$pname";
-                if ( !$@ ) {
-                    push @providers,
-                      "Template::Provider::${pname}"->new( $p->{args} );
+                my $prov = 'Template::Provider';
+                if($pname eq '_file_')
+                {
+                    $p->{args} = { %$config };
+                }
+                else
+                {
+                    $prov .="::$pname" if($pname ne '_file_');
+                }
+                eval "require $prov";
+                if(!$@) {
+                    push @providers, "$prov"->new($p->{args});
+                }
+                else
+                {
+                    $c->log->warn("Can't load $prov, ($@)");
                 }
             }
         }
         delete $config->{PROVIDERS};
-        if (@providers) {
+        if(@providers) {
             $config->{LOAD_TEMPLATES} = \@providers;
         }
     }
 
     my $self = $class->NEXT::new(
-        $c,
-        {
-            template => Template->new($config) || do {
-                my $error = Template->error();
-                $c->log->error($error);
-                $c->error($error);
-                return undef;
-            },
-            %{$config},
-        },
+        $c, { %$config }, 
     );
-    $self->include_path( $config->{INCLUDE_PATH} );
+
+    # Set base include paths. Local'd in render if needed
+    $self->include_path($config->{INCLUDE_PATH});
+    
     $self->config($config);
+
+    # Creation of template outside of call to new so that we can pass [ $self ]
+    # as INCLUDE_PATH config item, which then gets ->paths() called to get list
+    # of include paths to search for templates.
+   
+    # Use a weakend copy of self so we dont have loops preventing GC from working
+    my $copy = $self;
+    Scalar::Util::weaken($copy);
+    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
+    
+    $self->{template} = 
+        Template->new($config) || do {
+            my $error = Template->error();
+            $c->log->error($error);
+            $c->error($error);
+            return undef;
+        };
+
 
     return $self;
 }
@@ -374,16 +403,16 @@ sub process {
     my ( $self, $c ) = @_;
 
     my $template = $c->stash->{template}
-      || $c->action . $self->config->{TEMPLATE_EXTENSION};
+      ||  $c->action . $self->config->{TEMPLATE_EXTENSION};
 
     unless ($template) {
         $c->log->debug('No template specified for rendering') if $c->debug;
         return 0;
     }
 
-    my $output = $self->render( $c, $template );
+    my $output = $self->render($c, $template);
 
-    if ( (Scalar::Util::blessed($output)||'') eq 'Template::Exception' ) {
+    if (UNIVERSAL::isa($output, 'Template::Exception')) {
         my $error = qq/Coldn't render template "$output"/;
         $c->log->error($error);
         $c->error($error);
@@ -419,24 +448,23 @@ See L<Template::process|Template/process> for a full list of supported formats.
 =cut
 
 sub render {
-    my ( $self, $c, $template, $args ) = @_;
+    my ($self, $c, $template, $args) = @_;
 
     $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
 
     my $output;
-    my $vars = {
-        ( ref $args eq 'HASH' ? %$args : %{ $c->stash() } ),
+    my $vars = { 
+        (ref $args eq 'HASH' ? %$args : %{ $c->stash() }),
         $self->template_vars($c)
     };
 
-    local $self->{include_path} = $self->include_path;
-    unshift @{ $self->{include_path} }, @{ $vars->{additional_template_paths} }
-      if ref $c->stash->{additional_template_paths};
+    local $self->{include_path} = 
+        [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
+        if ref $vars->{additional_template_paths};
 
-    unless ( $self->template->process( $template, $vars, \$output ) ) {
-        return $self->template->error;
-    }
-    else {
+    unless ($self->template->process( $template, $vars, \$output ) ) {
+        return $self->template->error;  
+    } else {
         return $output;
     }
 }
@@ -459,7 +487,7 @@ sub template_vars {
         c    => $c,
         base => $c->req->base,
         name => $c->config->{name}
-      );
+      )
 }
 
 =item config
