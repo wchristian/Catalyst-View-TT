@@ -34,6 +34,7 @@ L<Catalyst::Response>, L<Catalyst::Helper>
 =head1 AUTHOR
 
 Sebastian Riedel, C<sri@oook.de>
+Marcus Ramberg, C<mramberg@cpan.org>
 
 =head1 LICENSE
 
@@ -52,19 +53,21 @@ package [% class %];
 use strict;
 use base 'Catalyst::View::TT';
 
+__PACKAGE__->config(TEMPLATE_EXTENSION => '.tt');
+
 =head1 NAME
 
-[% class %] - Catalyst TT View
-
-=head1 SYNOPSIS
-
-See L<[% app %]>
+[% class %] - TT View for [% app %]
 
 =head1 DESCRIPTION
 
-Catalyst TT View.
+TT View for [% app %]. 
 
 =head1 AUTHOR
+
+=head1 SEE ALSO
+
+L<[% app %]>
 
 [% author %]
 
