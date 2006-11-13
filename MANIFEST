@@ -4,7 +4,6 @@ lib/Catalyst/Helper/View/TTSite.pm
 lib/Catalyst/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
-META.yml
 README
 t/01use.t
 t/02pod.t
@@ -23,3 +22,4 @@ t/lib/TestApp/View/TT/Includepath.pm
 t/lib/TestApp/View/TT/Includepath2.pm
 t/lib/TestApp/View/TT/Includepath3.pm
 t/lib/TestApp/View/TT/Pkgconfig.pm
+META.yml                                 Module meta-data (added by MakeMaker)
