@@ -2,7 +2,9 @@ Revision history for Perl extension Catalyst::View::TT.
 
 0.24
        - Default to .tt extension
-       - pod cleanups for generated file	
+       - pod cleanups for generated file
+       - Move to Module::Install
+       - Use Data::Dump for debug
 
 0.23	Sun Mar 23 20:45:00 2006
 	- Added render suport. (Ash Berlin)

@@ -2,11 +2,12 @@ package Catalyst::View::TT;
 
 use strict;
 use base qw/Catalyst::View/;
+use Data::Dump;
 use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -19,7 +20,7 @@ Catalyst::View::TT - Template View Class
 
 =head1 SYNOPSIS
 
-# use the helper to create View
+# use the helper to create your View
     myapp_create.pl view TT TT
 
 # configure in lib/MyApp.pm
@@ -65,6 +66,188 @@ Catalyst::View::TT - Template View Class
     Context is [% c %]
     The base is [% base %]
     The name is [% name %]
+
+=cut
+
+sub _coerce_paths {
+    my ( $paths, $dlim ) = shift;
+    return () if ( !$paths );
+    return @{$paths} if ( ref $paths eq 'ARRAY' );
+
+    # tweak delim to ignore C:/
+    unless ( defined $dlim ) {
+        $dlim = ( $^O eq 'MSWin32' ) ? ':(?!\\/)' : ':';
+    }
+    return split( /$dlim/, $paths );
+}
+
+sub new {
+    my ( $class, $c, $arguments ) = @_;
+    my $config = {
+        EVAL_PERL          => 0,
+        TEMPLATE_EXTENSION => '',
+        %{ $class->config },
+        %{$arguments},
+    };
+    if ( ! (ref $config->{INCLUDE_PATH} eq 'ARRAY') ) {
+        my $delim = $config->{DELIMITER};
+        my @include_path
+            = _coerce_paths( $config->{INCLUDE_PATH}, $delim );
+        if ( !@include_path ) {
+            my $root = $c->config->{root};
+            my $base = Path::Class::dir( $root, 'base' );
+            @include_path = ( "$root", "$base" );
+        }
+        $config->{INCLUDE_PATH} = \@include_path;
+    }
+
+    # if we're debugging and/or the TIMER option is set, then we install
+    # Template::Timer as a custom CONTEXT object, but only if we haven't
+    # already got a custom CONTEXT defined
+
+    if ( $config->{TIMER} ) {
+        if ( $config->{CONTEXT} ) {
+            $c->log->error(
+                'Cannot use Template::Timer - a TT CONTEXT is already defined'
+            );
+        }
+        else {
+            $config->{CONTEXT} = Template::Timer->new(%$config);
+        }
+    }
+
+    if ( $c->debug && $config->{DUMP_CONFIG} ) {
+        $c->log->debug( "TT Config: ", Dump($config) );
+    }
+    if ( $config->{PROVIDERS} ) {
+        my @providers = ();
+        if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
+            foreach my $p (@{$config->{PROVIDERS}}) {
+                my $pname = $p->{name};
+                my $prov = 'Template::Provider';
+                if($pname eq '_file_')
+                {
+                    $p->{args} = { %$config };
+                }
+                else
+                {
+                    $prov .="::$pname" if($pname ne '_file_');
+                }
+                eval "require $prov";
+                if(!$@) {
+                    push @providers, "$prov"->new($p->{args});
+                }
+                else
+                {
+                    $c->log->warn("Can't load $prov, ($@)");
+                }
+            }
+        }
+        delete $config->{PROVIDERS};
+        if(@providers) {
+            $config->{LOAD_TEMPLATES} = \@providers;
+        }
+    }
+
+    my $self = $class->NEXT::new(
+        $c, { %$config }, 
+    );
+
+    # Set base include paths. Local'd in render if needed
+    $self->include_path($config->{INCLUDE_PATH});
+    
+    $self->config($config);
+
+    # Creation of template outside of call to new so that we can pass [ $self ]
+    # as INCLUDE_PATH config item, which then gets ->paths() called to get list
+    # of include paths to search for templates.
+   
+    # Use a weakend copy of self so we dont have loops preventing GC from working
+    my $copy = $self;
+    Scalar::Util::weaken($copy);
+    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
+    
+    $self->{template} = 
+        Template->new($config) || do {
+            my $error = Template->error();
+            $c->log->error($error);
+            $c->error($error);
+            return undef;
+        };
+
+
+    return $self;
+}
+
+sub process {
+    my ( $self, $c ) = @_;
+
+    my $template = $c->stash->{template}
+      ||  $c->action . $self->config->{TEMPLATE_EXTENSION};
+
+    unless (defined $template) {
+        $c->log->debug('No template specified for rendering') if $c->debug;
+        return 0;
+    }
+
+    my $output = $self->render($c, $template);
+
+    if (UNIVERSAL::isa($output, 'Template::Exception')) {
+        my $error = qq/Coldn't render template "$output"/;
+        $c->log->error($error);
+        $c->error($error);
+        return 0;
+    }
+
+    unless ( $c->response->content_type ) {
+        $c->response->content_type('text/html; charset=utf-8');
+    }
+
+    $c->response->body($output);
+
+    return 1;
+}
+
+sub render {
+    my ($self, $c, $template, $args) = @_;
+
+    $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
+
+    my $output;
+    my $vars = { 
+        (ref $args eq 'HASH' ? %$args : %{ $c->stash() }),
+        $self->template_vars($c)
+    };
+
+    local $self->{include_path} = 
+        [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
+        if ref $vars->{additional_template_paths};
+
+    unless ($self->template->process( $template, $vars, \$output ) ) {
+        return $self->template->error;  
+    } else {
+        return $output;
+    }
+}
+
+sub template_vars {
+    my ( $self, $c ) = @_;
+
+    my $cvar = $self->config->{CATALYST_VAR};
+
+    defined $cvar
+      ? ( $cvar => $c )
+      : (
+        c    => $c,
+        base => $c->req->base,
+        name => $c->config->{name}
+      )
+}
+
+
+1;
+
+__END__
 
 =head1 DESCRIPTION
 
@@ -276,157 +459,11 @@ See L<C<TIMER>> property of the L<config> method.
 The constructor for the TT view. Sets up the template provider, 
 and reads the application config.
 
-=cut
-
-sub _coerce_paths {
-    my ( $paths, $dlim ) = shift;
-    return () if ( !$paths );
-    return @{$paths} if ( ref $paths eq 'ARRAY' );
-
-    # tweak delim to ignore C:/
-    unless ( defined $dlim ) {
-        $dlim = ( $^O eq 'MSWin32' ) ? ':(?!\\/)' : ':';
-    }
-    return split( /$dlim/, $paths );
-}
-
-sub new {
-    my ( $class, $c, $arguments ) = @_;
-    my $config = {
-        EVAL_PERL          => 0,
-        TEMPLATE_EXTENSION => '',
-        %{ $class->config },
-        %{$arguments},
-    };
-    if ( ! (ref $config->{INCLUDE_PATH} eq 'ARRAY') ) {
-        my $delim = $config->{DELIMITER};
-        my @include_path
-            = _coerce_paths( $config->{INCLUDE_PATH}, $delim );
-        if ( !@include_path ) {
-            my $root = $c->config->{root};
-            my $base = Path::Class::dir( $root, 'base' );
-            @include_path = ( "$root", "$base" );
-        }
-        $config->{INCLUDE_PATH} = \@include_path;
-    }
-
-
-
-    # if we're debugging and/or the TIMER option is set, then we install
-    # Template::Timer as a custom CONTEXT object, but only if we haven't
-    # already got a custom CONTEXT defined
-
-    if ( $config->{TIMER} ) {
-        if ( $config->{CONTEXT} ) {
-            $c->log->error(
-                'Cannot use Template::Timer - a TT CONTEXT is already defined'
-            );
-        }
-        else {
-            $config->{CONTEXT} = Template::Timer->new(%$config);
-        }
-    }
-
-    if ( $c->debug && $config->{DUMP_CONFIG} ) {
-        use Data::Dumper;
-        $c->log->debug( "TT Config: ", Dumper($config) );
-    }
-    if ( $config->{PROVIDERS} ) {
-        my @providers = ();
-        if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
-            foreach my $p (@{$config->{PROVIDERS}}) {
-                my $pname = $p->{name};
-                my $prov = 'Template::Provider';
-                if($pname eq '_file_')
-                {
-                    $p->{args} = { %$config };
-                }
-                else
-                {
-                    $prov .="::$pname" if($pname ne '_file_');
-                }
-                eval "require $prov";
-                if(!$@) {
-                    push @providers, "$prov"->new($p->{args});
-                }
-                else
-                {
-                    $c->log->warn("Can't load $prov, ($@)");
-                }
-            }
-        }
-        delete $config->{PROVIDERS};
-        if(@providers) {
-            $config->{LOAD_TEMPLATES} = \@providers;
-        }
-    }
-
-    my $self = $class->NEXT::new(
-        $c, { %$config }, 
-    );
-
-    # Set base include paths. Local'd in render if needed
-    $self->include_path($config->{INCLUDE_PATH});
-    
-    $self->config($config);
-
-    # Creation of template outside of call to new so that we can pass [ $self ]
-    # as INCLUDE_PATH config item, which then gets ->paths() called to get list
-    # of include paths to search for templates.
-   
-    # Use a weakend copy of self so we dont have loops preventing GC from working
-    my $copy = $self;
-    Scalar::Util::weaken($copy);
-    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
-    
-    $self->{template} = 
-        Template->new($config) || do {
-            my $error = Template->error();
-            $c->log->error($error);
-            $c->error($error);
-            return undef;
-        };
-
-
-    return $self;
-}
-
 =item process
 
 Renders the template specified in C<< $c->stash->{template} >> or
 C<< $c->action >> (the private name of the matched action.  Calls L<render> to
 perform actual rendering. Output is stored in C<< $c->response->body >>.
-
-=cut
-
-sub process {
-    my ( $self, $c ) = @_;
-
-    my $template = $c->stash->{template}
-      ||  $c->action . $self->config->{TEMPLATE_EXTENSION};
-
-    unless ($template) {
-        $c->log->debug('No template specified for rendering') if $c->debug;
-        return 0;
-    }
-
-    my $output = $self->render($c, $template);
-
-    if (UNIVERSAL::isa($output, 'Template::Exception')) {
-        my $error = qq/Coldn't render template "$output"/;
-        $c->log->error($error);
-        $c->error($error);
-        return 0;
-    }
-
-    unless ( $c->response->content_type ) {
-        $c->response->content_type('text/html; charset=utf-8');
-    }
-
-    $c->response->body($output);
-
-    return 1;
-}
 
 =item render($c, $template, \%args)
 
@@ -445,50 +482,10 @@ C<$template> can be anything that Template::process understands how to
 process, including the name of a template file or a reference to a test string.
 See L<Template::process|Template/process> for a full list of supported formats.
 
-=cut
-
-sub render {
-    my ($self, $c, $template, $args) = @_;
-
-    $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
-
-    my $output;
-    my $vars = { 
-        (ref $args eq 'HASH' ? %$args : %{ $c->stash() }),
-        $self->template_vars($c)
-    };
-
-    local $self->{include_path} = 
-        [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
-        if ref $vars->{additional_template_paths};
-
-    unless ($self->template->process( $template, $vars, \$output ) ) {
-        return $self->template->error;  
-    } else {
-        return $output;
-    }
-}
-
 =item template_vars
 
 Returns a list of keys/values to be used as the catalyst variables in the
 template.
-
-=cut
-
-sub template_vars {
-    my ( $self, $c ) = @_;
-
-    my $cvar = $self->config->{CATALYST_VAR};
-
-    defined $cvar
-      ? ( $cvar => $c )
-      : (
-        c    => $c,
-        base => $c->req->base,
-        name => $c->config->{name}
-      )
-}
 
 =item config
 
@@ -588,5 +585,3 @@ This program is free software, you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
-
-1;
