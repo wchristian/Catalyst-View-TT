@@ -193,7 +193,7 @@ sub process {
     my $output = $self->render($c, $template);
 
     if (UNIVERSAL::isa($output, 'Template::Exception')) {
-        my $error = qq/Coldn't render template "$output"/;
+        my $error = qq/Couldn't render template "$output"/;
         $c->log->error($error);
         $c->error($error);
         return 0;
