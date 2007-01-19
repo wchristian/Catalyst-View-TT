@@ -7,7 +7,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -392,9 +392,10 @@ item in the stash.
         $c->forward('MyApp::V::TT');
     }
 
-If a class item isn't defined, then it instead uses the
-current match, as returned by C<< $c->match >>.  In the above 
-example, this would be C<message>.
+If a stash item isn't defined, then it instead uses the
+stringification of the action dispatched to (as defined by $c->action)
+in the above example, this would be C<message>, but because the default
+is to append '.tt', it would load C<root/message.tt>.
 
 The items defined in the stash are passed to the Template Toolkit for
 use as template variables.

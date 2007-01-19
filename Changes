@@ -1,6 +1,10 @@
 Revision history for Perl extension Catalyst::View::TT.
+       - Update docs to reflect action change
 
-0.24
+0.25   2007-01-15 16:06
+       - The little typo that cold
+
+0.24   2006-11-15 16:34
        - Default to .tt extension
        - pod cleanups for generated file
        - Move to Module::Install
