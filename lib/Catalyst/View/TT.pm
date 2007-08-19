@@ -2,7 +2,7 @@ package Catalyst::View::TT;
 
 use strict;
 use base qw/Catalyst::View/;
-use Data::Dump;
+use Data::Dump 'dump';
 use Template;
 use Template::Timer;
 use NEXT;
@@ -117,7 +117,7 @@ sub new {
     }
 
     if ( $c->debug && $config->{DUMP_CONFIG} ) {
-        $c->log->debug( "TT Config: ", Dump($config) );
+        $c->log->debug( "TT Config: ", dump($config) );
     }
     if ( $config->{PROVIDERS} ) {
         my @providers = ();
