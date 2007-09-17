@@ -27,7 +27,7 @@ Catalyst::View::TT - Template View Class
 
     MyApp->config(
         name     => 'MyApp',
-        root     => MyApp->path_to('root');,
+        root     => MyApp->path_to('root'),
         'View::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
