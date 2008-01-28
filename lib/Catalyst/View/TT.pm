@@ -7,7 +7,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -453,20 +453,18 @@ See L<C<TIMER>> property of the L<config> method.
 
 =head2 METHODS
 
-=over 4
-
-=item new
+=head2 new
 
 The constructor for the TT view. Sets up the template provider, 
 and reads the application config.
 
-=item process
+=head2 process
 
 Renders the template specified in C<< $c->stash->{template} >> or
 C<< $c->action >> (the private name of the matched action.  Calls L<render> to
 perform actual rendering. Output is stored in C<< $c->response->body >>.
 
-=item render($c, $template, \%args)
+=head2 render($c, $template, \%args)
 
 Renders the given template and returns output, or a L<Template::Exception>
 object upon error. 
@@ -483,19 +481,21 @@ C<$template> can be anything that Template::process understands how to
 process, including the name of a template file or a reference to a test string.
 See L<Template::process|Template/process> for a full list of supported formats.
 
-=item template_vars
+=head2 template_vars
 
 Returns a list of keys/values to be used as the catalyst variables in the
 template.
 
-=item config
+=head2 config
 
 This method allows your view subclass to pass additional settings to
 the TT configuration hash, or to set the options as below:
 
-=over 2
+=head2 paths
 
-=item C<CATALYST_VAR> 
+The list of paths TT will look for templates in.
+
+=head2 C<CATALYST_VAR> 
 
 Allows you to change the name of the Catalyst context object. If set, it will also
 remove the base and name aliases, so you will have access them through <context>.
@@ -515,7 +515,7 @@ F<message.tt2>:
     The base is [% Catalyst.req.base %]
     The name is [% Catalyst.config.name %]
 
-=item C<TIMER>
+=head2 C<TIMER>
 
 If you have configured Catalyst for debug output, and turned on the TIMER setting,
 C<Catalyst::View::TT> will enable profiling of template processing
@@ -533,7 +533,7 @@ output from your templates, such as:
     <!-- TIMER END: process mainmenu/footer.tt (0.003016 seconds) -->
 
 
-=item C<TEMPLATE_EXTENSION>
+=head2 C<TEMPLATE_EXTENSION>
 
 a sufix to add when looking for templates bases on the C<match> method in L<Catalyst::Request>.
 
@@ -544,10 +544,6 @@ For example:
 
 Would by default look for a template in <root>/test/test. If you set TEMPLATE_EXTENSION to '.tt', it will look for
 <root>/test/test.tt.
-
-=back
-
-=back
 
 =head2 HELPERS
 

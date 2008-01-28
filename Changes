@@ -1,4 +1,8 @@
 Revision history for Perl extension Catalyst::View::TT.
+
+0.26   2008-01-11 20:12:00
+       - Fix pod coverage
+       - Change from =item to =head2
        - Update docs to reflect action change
 
 0.25   2007-01-15 16:06
