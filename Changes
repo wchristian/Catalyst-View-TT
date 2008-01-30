@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.27
+	   - Document providers and support unary plus for fully qualified class
+		 names
+
 0.26   2008-01-11 20:12:00
        - Fix pod coverage
        - Change from =item to =head2

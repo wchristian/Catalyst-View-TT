@@ -131,7 +131,13 @@ sub new {
                 }
                 else
                 {
-                    $prov .="::$pname" if($pname ne '_file_');
+                    if($pname =~ s/^\+//) {
+                        $prov = $pname;
+                    }
+                    else
+                    {
+                        $prov .= "::$pname";
+                    }
                 }
                 eval "require $prov";
                 if(!$@) {
@@ -544,6 +550,37 @@ For example:
 
 Would by default look for a template in <root>/test/test. If you set TEMPLATE_EXTENSION to '.tt', it will look for
 <root>/test/test.tt.
+
+=head2 C<PROVIDERS>
+
+Allows you to specify the template providers that TT will use.
+
+    MyApp->config({
+        name     => 'MyApp',
+        root     => MyApp->path_to('root'),
+        'V::TT' => {
+            PROVIDERS => [
+                {
+                    name    => 'DBI',
+                    args    => {
+                        DBI_DSN => 'dbi:DB2:books',
+                        DBI_USER=> 'foo'
+                    }
+                }, {
+                    name    => '_file_',
+                    args    => {}
+                }
+            ]
+        },
+    });
+
+The 'name' key should correspond to the class name of the provider you
+want to use.  The _file_ name is a special case that represents the default
+TT file-based provider.  By default the name is will be prefixed with
+'Template::Provider::'.  You can fully qualify the name by using a unary
+plus:
+
+    name => '+MyApp::Provider::Foo'
 
 =head2 HELPERS
 
