@@ -123,7 +123,6 @@ use strict;
 use base 'Catalyst::View::TT';
 
 __PACKAGE__->config({
-    CATALYST_VAR => 'Catalyst',
     INCLUDE_PATH => [
         [% app %]->path_to( 'root', 'src' ),
         [% app %]->path_to( 'root', 'lib' )

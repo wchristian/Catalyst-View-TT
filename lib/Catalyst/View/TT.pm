@@ -23,7 +23,7 @@ Catalyst::View::TT - Template View Class
 # use the helper to create your View
     myapp_create.pl view TT TT
 
-# configure in lib/MyApp.pm
+# configure in lib/MyApp.pm (Could be set from configfile instead)
 
     MyApp->config(
         name     => 'MyApp',
@@ -34,13 +34,12 @@ Catalyst::View::TT - Template View Class
               MyApp->path_to( 'root', 'src' ), 
               MyApp->path_to( 'root', 'lib' ), 
             ],
+            TEMPLATE_EXTENSION => '.tt',
+            CATALYST_VAR => 'c',
+            TIMER        => 0,
+            # Not set by default
             PRE_PROCESS        => 'config/main',
             WRAPPER            => 'site/wrapper',
-            TEMPLATE_EXTENSION => '.tt',
-
-            # two optional config items
-            CATALYST_VAR => 'Catalyst',
-            TIMER        => 1,
         },
     );
          
@@ -119,6 +118,25 @@ sub new {
     if ( $c->debug && $config->{DUMP_CONFIG} ) {
         $c->log->debug( "TT Config: ", dump($config) );
     }
+
+    my $self = $class->NEXT::new(
+        $c, { %$config }, 
+    );
+
+    # Set base include paths. Local'd in render if needed
+    $self->include_path($config->{INCLUDE_PATH});
+    
+    $self->config($config);
+
+    # Creation of template outside of call to new so that we can pass [ $self ]
+    # as INCLUDE_PATH config item, which then gets ->paths() called to get list
+    # of include paths to search for templates.
+   
+    # Use a weakend copy of self so we dont have loops preventing GC from working
+    my $copy = $self;
+    Scalar::Util::weaken($copy);
+    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
+
     if ( $config->{PROVIDERS} ) {
         my @providers = ();
         if ( ref($config->{PROVIDERS}) eq 'ARRAY') {
@@ -138,6 +156,14 @@ sub new {
                     {
                         $prov .= "::$pname";
                     }
+                    # We copy the args people want from the config
+                    # to the args
+                    $p->{args} ||= {};
+                    if ($p->{copy_config}) {
+                        map  { $p->{args}->{$_} = $config->{$_}  }
+                                   grep { exists $config->{$_} }
+                                   @{ $p->{copy_config} };
+                    }
                 }
                 eval "require $prov";
                 if(!$@) {
@@ -154,24 +180,6 @@ sub new {
             $config->{LOAD_TEMPLATES} = \@providers;
         }
     }
-
-    my $self = $class->NEXT::new(
-        $c, { %$config }, 
-    );
-
-    # Set base include paths. Local'd in render if needed
-    $self->include_path($config->{INCLUDE_PATH});
-    
-    $self->config($config);
-
-    # Creation of template outside of call to new so that we can pass [ $self ]
-    # as INCLUDE_PATH config item, which then gets ->paths() called to get list
-    # of include paths to search for templates.
-   
-    # Use a weakend copy of self so we dont have loops preventing GC from working
-    my $copy = $self;
-    Scalar::Util::weaken($copy);
-    $config->{INCLUDE_PATH} = [ sub { $copy->paths } ];
     
     $self->{template} = 
         Template->new($config) || do {
@@ -581,6 +589,20 @@ TT file-based provider.  By default the name is will be prefixed with
 plus:
 
     name => '+MyApp::Provider::Foo'
+
+You can also specify the 'copy_config' key as an arrayref, to copy those keys
+from the general config, into the config for the provider:
+    
+    DEFAULT_ENCODING    => 'utf-8',
+    PROVIDERS => [
+        {
+            name    => 'Encoding',
+            copy_config => [qw(DEFAULT_ENCODING INCLUDE_PATH)]
+        }
+    ]
+    
+This can prove useful when you want to use the additional_template_paths hack
+in your own provider, or if you need to use Template::Provider::Encoding
 
 =head2 HELPERS
 
