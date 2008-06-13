@@ -63,11 +63,11 @@ __PACKAGE__->config(TEMPLATE_EXTENSION => '.tt');
 
 TT View for [% app %]. 
 
-=head1 AUTHOR
-
 =head1 SEE ALSO
 
 L<[% app %]>
+
+=head1 AUTHOR
 
 [% author %]
 

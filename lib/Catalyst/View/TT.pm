@@ -7,7 +7,7 @@ use Template;
 use Template::Timer;
 use NEXT;
 
-our $VERSION = '0.26';
+our $VERSION = '0.28';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
