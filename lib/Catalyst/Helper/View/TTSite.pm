@@ -212,7 +212,7 @@ __config_col__
       message = site.rgb.green
       error   = site.rgb.red
    };
-%]
+-%]
 __config_url__
 [% TAGS star -%]
 [% base = Catalyst.req.base;
