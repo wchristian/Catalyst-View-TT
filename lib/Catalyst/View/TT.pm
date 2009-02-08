@@ -5,7 +5,7 @@ use base qw/Catalyst::View/;
 use Data::Dump 'dump';
 use Template;
 use Template::Timer;
-use NEXT;
+use MRO::Compat;
 
 our $VERSION = '0.28';
 
@@ -119,7 +119,7 @@ sub new {
         $c->log->debug( "TT Config: ", dump($config) );
     }
 
-    my $self = $class->NEXT::new(
+    my $self = $class->next::method(
         $c, { %$config }, 
     );
 
@@ -320,7 +320,7 @@ happens when the module is first loaded.
 The second way is to define a C<new()> method in your view subclass.
 This performs the configuration when the view object is created,
 shortly after being loaded.  Remember to delegate to the base class
-C<new()> method (via C<$self-E<gt>NEXT::new()> in the example below) after
+C<new()> method (via C<$self-E<gt>next::method()> in the example below) after
 performing any configuration.
 
     sub new {
@@ -333,7 +333,7 @@ performing any configuration.
             PRE_PROCESS  => 'config/main',
             WRAPPER      => 'site/wrapper',
         });
-        return $self->NEXT::new(@_);
+        return $self->next::method(@_);
     }
  
 The final, and perhaps most direct way, is to define a class
@@ -341,8 +341,8 @@ item in your main application configuration, again by calling the
 uniquitous C<config()> method.  The items in the class hash are
 added to those already defined by the above two methods.  This happens
 in the base class new() method (which is one reason why you must
-remember to call it via C<NEXT> if you redefine the C<new()> method in a
-subclass).
+remember to call it via C<MRO::Compat> if you redefine the C<new()> 
+method in a subclass).
 
     package MyApp;
     

@@ -14,6 +14,7 @@ requires 'Template'        => 0;
 requires 'Class::Accessor' => 0;
 requires 'Template::Timer' => 0;
 requires 'Path::Class'     => 0;
+requires 'MRO::Compat'     => 0;
 
 test_requires 'Test::More';
 
