@@ -51,7 +51,7 @@ Catalyst::View::TT - Template View Class
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  = 'Hello World!';
-        $c->forward('MyApp::View::TT');
+        $c->forward( $c->view('TT') );
     }
 
 # access variables from template
@@ -283,7 +283,9 @@ something like this:
     package FooBar::View::TT;
     
     use strict;
-     use base 'Catalyst::View::TT';
+    use warnings;
+    
+    use base 'Catalyst::View::TT';
 
     __PACKAGE__->config->{DEBUG} = 'all';
 
@@ -296,7 +298,7 @@ to the TT view class.
     
     sub end : Private {
         my( $self, $c ) = @_;
-        $c->forward('MyApp::View::TT');
+        $c->forward( $c->view('TT') );
     }
 
 =head2 CONFIGURATION

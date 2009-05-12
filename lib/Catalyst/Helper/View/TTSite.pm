@@ -66,7 +66,7 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
     
     sub end : Private {
         my ( $self, $c ) = @_;
-        $c->forward('MyApp::V::TT');
+        $c->forward( $c->view('TT') );
     }
 
 =head1 DESCRIPTION
