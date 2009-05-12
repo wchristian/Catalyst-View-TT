@@ -1,13 +1,15 @@
 package Catalyst::View::TT;
 
 use strict;
+use warnings;
+
 use base qw/Catalyst::View/;
 use Data::Dump 'dump';
 use Template;
 use Template::Timer;
 use MRO::Compat;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -43,13 +45,13 @@ Catalyst::View::TT - Template View Class
         },
     );
          
-# render view from lib/MyApp.pm or lib/MyApp::C::SomeController.pm
+# render view from lib/MyApp.pm or lib/MyApp::Controller::SomeController.pm
     
     sub message : Global {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  = 'Hello World!';
-        $c->forward('MyApp::V::TT');
+        $c->forward('MyApp::View::TT');
     }
 
 # access variables from template
@@ -274,11 +276,11 @@ of the Catalyst setup.
 
     $ script/myapp_create.pl view TT TT
 
-This creates a MyApp::V::TT.pm module in the F<lib> directory (again,
+This creates a MyApp::View::TT.pm module in the F<lib> directory (again,
 replacing C<MyApp> with the name of your application) which looks
 something like this:
 
-    package FooBar::V::TT;
+    package FooBar::View::TT;
     
     use strict;
      use base 'Catalyst::View::TT';
@@ -294,7 +296,7 @@ to the TT view class.
     
     sub end : Private {
         my( $self, $c ) = @_;
-        $c->forward('MyApp::V::TT');
+        $c->forward('MyApp::View::TT');
     }
 
 =head2 CONFIGURATION
@@ -303,12 +305,12 @@ There are a three different ways to configure your view class.  The
 first way is to call the C<config()> method in the view subclass.  This
 happens when the module is first loaded.
 
-    package MyApp::V::TT;
+    package MyApp::View::TT;
     
     use strict;
     use base 'Catalyst::View::TT';
 
-    MyApp::V::TT->config({
+    MyApp::View::TT->config({
         INCLUDE_PATH => [
             MyApp->path_to( 'root', 'templates', 'lib' ),
             MyApp->path_to( 'root', 'templates', 'src' ),
@@ -352,7 +354,7 @@ method in a subclass).
     MyApp->config({
         name     => 'MyApp',
         root     => MyApp->path_to('root'),
-        'V::TT' => {
+        'View::TT' => {
             INCLUDE_PATH => [
                 MyApp->path_to( 'root', 'templates', 'lib' ),
                 MyApp->path_to( 'root', 'templates', 'src' ),
@@ -403,7 +405,7 @@ item in the stash.
     sub message : Global {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
-        $c->forward('MyApp::V::TT');
+        $c->forward( $c->view('TT') );
     }
 
 If a stash item isn't defined, then it instead uses the
@@ -418,7 +420,7 @@ use as template variables.
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  = 'Hello World!';
-        $c->forward('MyApp::V::TT');
+        $c->forward( $c->view('TT') );
     }
 
 A number of other template variables are also added:
@@ -519,7 +521,7 @@ For example:
     MyApp->config({
         name     => 'MyApp',
         root     => MyApp->path_to('root'),
-        'V::TT' => {
+        'View::TT' => {
             CATALYST_VAR => 'Catalyst',
         },
     });
@@ -553,7 +555,7 @@ a sufix to add when looking for templates bases on the C<match> method in L<Cata
 
 For example:
 
-  package MyApp::C::Test;
+  package MyApp::Controller::Test;
   sub test : Local { .. } 
 
 Would by default look for a template in <root>/test/test. If you set TEMPLATE_EXTENSION to '.tt', it will look for
@@ -566,7 +568,7 @@ Allows you to specify the template providers that TT will use.
     MyApp->config({
         name     => 'MyApp',
         root     => MyApp->path_to('root'),
-        'V::TT' => {
+        'View::TT' => {
             PROVIDERS => [
                 {
                     name    => 'DBI',
