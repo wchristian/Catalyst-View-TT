@@ -23,6 +23,7 @@ Catalyst::View::TT - Template View Class
 =head1 SYNOPSIS
 
 # use the helper to create your View
+
     myapp_create.pl view TT TT
 
 # configure in lib/MyApp.pm (Could be set from configfile instead)
@@ -342,7 +343,7 @@ performing any configuration.
  
 The final, and perhaps most direct way, is to define a class
 item in your main application configuration, again by calling the
-uniquitous C<config()> method.  The items in the class hash are
+ubiquitous C<config()> method.  The items in the class hash are
 added to those already defined by the above two methods.  This happens
 in the base class new() method (which is one reason why you must
 remember to call it via C<MRO::Compat> if you redefine the C<new()> 
@@ -479,7 +480,7 @@ and reads the application config.
 =head2 process
 
 Renders the template specified in C<< $c->stash->{template} >> or
-C<< $c->action >> (the private name of the matched action.  Calls L<render> to
+C<< $c->action >> (the private name of the matched action).  Calls L<render> to
 perform actual rendering. Output is stored in C<< $c->response->body >>.
 
 =head2 render($c, $template, \%args)
@@ -641,7 +642,7 @@ Andy Wardley, C<abw@cpan.org>
 
 =head1 COPYRIGHT
 
-This program is free software, you can redistribute it and/or modify it 
+This program is free software. You can redistribute it and/or modify it 
 under the same terms as Perl itself.
 
 =cut
