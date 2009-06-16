@@ -34,8 +34,8 @@ Catalyst::View::TT - Template View Class
         'View::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
-              MyApp->path_to( 'root', 'src' ), 
-              MyApp->path_to( 'root', 'lib' ), 
+              MyApp->path_to( 'root', 'src' ),
+              MyApp->path_to( 'root', 'lib' ),
             ],
             TEMPLATE_EXTENSION => '.tt',
             CATALYST_VAR => 'c',
@@ -45,9 +45,9 @@ Catalyst::View::TT - Template View Class
             WRAPPER            => 'site/wrapper',
         },
     );
-         
+
 # render view from lib/MyApp.pm or lib/MyApp::Controller::SomeController.pm
-    
+
     sub message : Global {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
@@ -58,12 +58,12 @@ Catalyst::View::TT - Template View Class
 # access variables from template
 
     The message is: [% message %].
-    
+
     # example when CATALYST_VAR is set to 'Catalyst'
-    Context is [% Catalyst %]          
-    The base is [% Catalyst.req.base %] 
-    The name is [% Catalyst.config.name %] 
-    
+    Context is [% Catalyst %]
+    The base is [% Catalyst.req.base %]
+    The name is [% Catalyst.config.name %]
+
     # example when CATALYST_VAR isn't set
     Context is [% c %]
     The base is [% base %]
@@ -123,18 +123,18 @@ sub new {
     }
 
     my $self = $class->next::method(
-        $c, { %$config }, 
+        $c, { %$config },
     );
 
     # Set base include paths. Local'd in render if needed
     $self->include_path($config->{INCLUDE_PATH});
-    
+
     $self->config($config);
 
     # Creation of template outside of call to new so that we can pass [ $self ]
     # as INCLUDE_PATH config item, which then gets ->paths() called to get list
     # of include paths to search for templates.
-   
+
     # Use a weakend copy of self so we dont have loops preventing GC from working
     my $copy = $self;
     Scalar::Util::weaken($copy);
@@ -183,8 +183,8 @@ sub new {
             $config->{LOAD_TEMPLATES} = \@providers;
         }
     }
-    
-    $self->{template} = 
+
+    $self->{template} =
         Template->new($config) || do {
             my $error = Template->error();
             $c->log->error($error);
@@ -231,17 +231,17 @@ sub render {
     $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
 
     my $output;
-    my $vars = { 
+    my $vars = {
         (ref $args eq 'HASH' ? %$args : %{ $c->stash() }),
         $self->template_vars($c)
     };
 
-    local $self->{include_path} = 
+    local $self->{include_path} =
         [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
         if ref $vars->{additional_template_paths};
 
     unless ($self->template->process( $template, $vars, \$output ) ) {
-        return $self->template->error;  
+        return $self->template->error;
     } else {
         return $output;
     }
@@ -282,10 +282,10 @@ replacing C<MyApp> with the name of your application) which looks
 something like this:
 
     package FooBar::View::TT;
-    
+
     use strict;
     use warnings;
-    
+
     use base 'Catalyst::View::TT';
 
     __PACKAGE__->config->{DEBUG} = 'all';
@@ -296,7 +296,7 @@ in the end() method, for example, to automatically forward all actions
 to the TT view class.
 
     # In MyApp or MyApp::Controller::SomeController
-    
+
     sub end : Private {
         my( $self, $c ) = @_;
         $c->forward( $c->view('TT') );
@@ -309,7 +309,7 @@ first way is to call the C<config()> method in the view subclass.  This
 happens when the module is first loaded.
 
     package MyApp::View::TT;
-    
+
     use strict;
     use base 'Catalyst::View::TT';
 
@@ -340,20 +340,20 @@ performing any configuration.
         });
         return $self->next::method(@_);
     }
- 
+
 The final, and perhaps most direct way, is to define a class
 item in your main application configuration, again by calling the
 ubiquitous C<config()> method.  The items in the class hash are
 added to those already defined by the above two methods.  This happens
 in the base class new() method (which is one reason why you must
-remember to call it via C<MRO::Compat> if you redefine the C<new()> 
+remember to call it via C<MRO::Compat> if you redefine the C<new()>
 method in a subclass).
 
     package MyApp;
-    
+
     use strict;
     use Catalyst;
-    
+
     MyApp->config({
         name     => 'MyApp',
         root     => MyApp->path_to('root'),
@@ -369,12 +369,12 @@ method in a subclass).
 
 Note that any configuration items defined by one of the earlier
 methods will be overwritten by items of the same name provided by the
-latter methods.  
+latter methods.
 
 =head2 DYNAMIC INCLUDE_PATH
 
 Sometimes it is desirable to modify INCLUDE_PATH for your templates at run time.
- 
+
 Additional paths can be added to the start of INCLUDE_PATH via the stash as
 follows:
 
@@ -396,14 +396,14 @@ checking and the chance of a memory leak:
 
     @{ $c->view('TT')->include_path } = qw/path another_path/;
 
-If you are calling C<render> directly then you can specify dynamic paths by 
+If you are calling C<render> directly then you can specify dynamic paths by
 having a C<additional_template_paths> key with a value of additonal directories
 to search. See L<CAPTURING TEMPLATE OUTPUT> for an example showing this.
 
 =head2 RENDERING VIEWS
 
 The view plugin renders the template specified in the C<template>
-item in the stash.  
+item in the stash.
 
     sub message : Global {
         my ( $self, $c ) = @_;
@@ -451,7 +451,7 @@ L<Catalyst::Plugin::Email> and the L<render> method:
 
   sub send_email : Local {
     my ($self, $c) = @_;
-    
+
     $c->email(
       header => [
         To      => 'me@localhost',
@@ -474,7 +474,7 @@ See L<C<TIMER>> property of the L<config> method.
 
 =head2 new
 
-The constructor for the TT view. Sets up the template provider, 
+The constructor for the TT view. Sets up the template provider,
 and reads the application config.
 
 =head2 process
@@ -486,17 +486,17 @@ perform actual rendering. Output is stored in C<< $c->response->body >>.
 =head2 render($c, $template, \%args)
 
 Renders the given template and returns output, or a L<Template::Exception>
-object upon error. 
+object upon error.
 
-The template variables are set to C<%$args> if $args is a hashref, or 
-$C<< $c->stash >> otherwise. In either case the variables are augmented with 
+The template variables are set to C<%$args> if $args is a hashref, or
+$C<< $c->stash >> otherwise. In either case the variables are augmented with
 C<base> set to C< << $c->req->base >>, C<c> to C<$c> and C<name> to
 C<< $c->config->{name} >>. Alternately, the C<CATALYST_VAR> configuration item
 can be defined to specify the name of a template variable through which the
 context reference (C<$c>) can be accessed. In this case, the C<c>, C<base> and
 C<name> variables are omitted.
 
-C<$template> can be anything that Template::process understands how to 
+C<$template> can be anything that Template::process understands how to
 process, including the name of a template file or a reference to a test string.
 See L<Template::process|Template/process> for a full list of supported formats.
 
@@ -514,7 +514,7 @@ the TT configuration hash, or to set the options as below:
 
 The list of paths TT will look for templates in.
 
-=head2 C<CATALYST_VAR> 
+=head2 C<CATALYST_VAR>
 
 Allows you to change the name of the Catalyst context object. If set, it will also
 remove the base and name aliases, so you will have access them through <context>.
@@ -559,7 +559,7 @@ a sufix to add when looking for templates bases on the C<match> method in L<Cata
 For example:
 
   package MyApp::Controller::Test;
-  sub test : Local { .. } 
+  sub test : Local { .. }
 
 Would by default look for a template in <root>/test/test. If you set TEMPLATE_EXTENSION to '.tt', it will look for
 <root>/test/test.tt.
@@ -597,7 +597,7 @@ plus:
 
 You can also specify the 'copy_config' key as an arrayref, to copy those keys
 from the general config, into the config for the provider:
-    
+
     DEFAULT_ENCODING    => 'utf-8',
     PROVIDERS => [
         {
@@ -605,7 +605,7 @@ from the general config, into the config for the provider:
             copy_config => [qw(DEFAULT_ENCODING INCLUDE_PATH)]
         }
     ]
-    
+
 This can prove useful when you want to use the additional_template_paths hack
 in your own provider, or if you need to use Template::Provider::Encoding
 
@@ -642,7 +642,7 @@ Andy Wardley, C<abw@cpan.org>
 
 =head1 COPYRIGHT
 
-This program is free software. You can redistribute it and/or modify it 
+This program is free software. You can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
