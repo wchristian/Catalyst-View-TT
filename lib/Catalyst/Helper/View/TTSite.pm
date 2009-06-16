@@ -58,12 +58,12 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  ||= $c->req->param('message') || 'No message';
     }
-    
+
     sub default : Private {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'welcome.tt2';
     }
-    
+
     sub end : Private {
         my ( $self, $c ) = @_;
         $c->forward( $c->view('TT') );
@@ -84,7 +84,7 @@ etc.) that the page templates use.
 The view module that the helper creates is automatically configured
 to locate these templates.
 
-=head2 Default Rendering 
+=head2 Default Rendering
 
 To render a template the following process is applied:
 
@@ -143,7 +143,7 @@ Andy Wardley <abw@cpan.org>
 
 =head1 LICENSE
 
-This library is free software . You can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as perl itself.
 
 =cut
@@ -187,7 +187,7 @@ Catalyst TTSite View.
 
 =head1 LICENSE
 
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
@@ -202,7 +202,7 @@ __config_main__
 [% # config/main
    #
    # This is the main configuration template which is processed before
-   # any other page, by virtue of it being defined as a PRE_PROCESS 
+   # any other page, by virtue of it being defined as a PRE_PROCESS
    # template.  This is the place to define any extra template variables,
    # macros, load plugins, and perform any other template setup.
 
@@ -217,12 +217,12 @@ __config_main__
      copyright => '[* year *] Your Name Here',
    };
 
-   # load up any other configuration items 
+   # load up any other configuration items
    PROCESS config/col
          + config/url;
 
    # set defaults for variables, etc.
-   DEFAULT 
+   DEFAULT
      message = 'There is no message';
 
 -%]
@@ -310,7 +310,7 @@ __welcome.tt2__
   plugin module.
 </p>
 <p>
-  This is the welcome page.  Why not try the equally-exciting 
+  This is the welcome page.  Why not try the equally-exciting
   <a href="[% site.url.message %]">Message Page</a>?
 </p>
 __message.tt2__
@@ -335,8 +335,8 @@ __error.tt2__
 [% TAGS star -%]
 [% META title = 'Catalyst/TT Error' %]
 <p>
-  An error has occurred.  We're terribly sorry about that, but it's 
-  one of those things that happens from time to time.  Let's just 
+  An error has occurred.  We're terribly sorry about that, but it's
+  one of those things that happens from time to time.  Let's just
   hope the developers test everything properly before release...
 </p>
 <p>
@@ -349,7 +349,7 @@ html {
     height: 100%;
 }
 
-body { 
+body {
     background-color: [% site.col.page %];
     color: [% site.col.text %];
     margin: 0px;

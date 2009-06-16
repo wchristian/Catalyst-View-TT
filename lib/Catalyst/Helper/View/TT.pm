@@ -63,7 +63,7 @@ __PACKAGE__->config(TEMPLATE_EXTENSION => '.tt');
 
 =head1 DESCRIPTION
 
-TT View for [% app %]. 
+TT View for [% app %].
 
 =head1 SEE ALSO
 
@@ -75,7 +75,7 @@ L<[% app %]>
 
 =head1 LICENSE
 
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
