@@ -5,6 +5,8 @@ Revision history for Perl extension Catalyst::View::TT.
           + Expand ::V:: to ::View:: (RT #45792)
           + Expand ::C:: to ::Controller:: and use $c->view('TT')
             where appropriate (bricas)
+          + Add note about use CGI in a template making Catalyst hang
+            (Gunnar Strand)
         - "use warnings" in Catalyst::View::TT and output from the TT helper
         - Expand TTSite documentation (RT #33838)
 

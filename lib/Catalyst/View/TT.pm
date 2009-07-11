@@ -625,6 +625,17 @@ further.  It also creates a default set of templates to get you
 started.  It also configures the view module to locate the templates
 automatically.
 
+=head1 NOTES
+
+If you are using the L<CGI> module inside your templates, you will
+experience that the Catalyst server appears to hang while rendering
+the web page. This is due to the debug mode of L<CGI> (which is
+waiting for input in the terminal window). Turning off the
+debug mode using the "-no_debug" option solves the
+problem, eg.:
+
+    [% USE CGI('-no_debug') %]
+
 =head1 SEE ALSO
 
 L<Catalyst>, L<Catalyst::Helper::View::TT>,
