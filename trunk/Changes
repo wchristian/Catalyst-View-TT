@@ -9,6 +9,8 @@ Revision history for Perl extension Catalyst::View::TT.
             (Gunnar Strand)
         - "use warnings" in Catalyst::View::TT and output from the TT helper
         - Expand TTSite documentation (RT #33838)
+        - Added a test for direct rendering of a template from a view object,
+          without a request.
 
 0.29    2009-02-20 14:43:00
         - Remove extra unwanted .gitignore from manifest
