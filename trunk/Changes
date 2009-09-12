@@ -11,6 +11,7 @@ Revision history for Perl extension Catalyst::View::TT.
         - Expand TTSite documentation (RT #33838)
         - Added a test for direct rendering of a template from a view object,
           without a request.
+        - Added support for running render with a undef context.
 
 0.29    2009-02-20 14:43:00
         - Remove extra unwanted .gitignore from manifest

@@ -1,13 +1,12 @@
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More tests => 3;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
 
 BEGIN { use_ok 'TestApp' or die }
 
-ok my $c  = TestApp->new, 'Instantiate app object';
-ok my $tt = $c->view('TT'), 'Get TT view object';
-is $tt->render($c, 'test.tt', { message => 'hello' }), 'hello',
+ok my $tt = TestApp->view('TT'), 'Get TT view object';
+is $tt->render(undef, 'test.tt', { message => 'hello' }), 'hello',
     'render() should return the template output';
