@@ -228,7 +228,7 @@ sub process {
 sub render {
     my ($self, $c, $template, $args) = @_;
 
-    $c->log->debug(qq/Rendering template "$template"/) if $c->debug;
+    $c->log->debug(qq/Rendering template "$template"/) if $c && $c->debug;
 
     my $output;
     my $vars = {
@@ -250,6 +250,7 @@ sub render {
 sub template_vars {
     my ( $self, $c ) = @_;
 
+    return  () unless $c;
     my $cvar = $self->config->{CATALYST_VAR};
 
     defined $cvar
@@ -499,6 +500,9 @@ C<name> variables are omitted.
 C<$template> can be anything that Template::process understands how to
 process, including the name of a template file or a reference to a test string.
 See L<Template::process|Template/process> for a full list of supported formats.
+
+To use the render method outside of your Catalyst app, just pass a undef context. 
+This can be useful for tests, for instance.
 
 =head2 template_vars
 
