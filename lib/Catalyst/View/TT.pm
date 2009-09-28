@@ -484,6 +484,8 @@ Renders the template specified in C<< $c->stash->{template} >> or
 C<< $c->action >> (the private name of the matched action).  Calls L<render> to
 perform actual rendering. Output is stored in C<< $c->response->body >>.
 
+FIXME: NOTE forward here
+
 =head2 render($c, $template, \%args)
 
 Renders the given template and returns output, or a L<Template::Exception>
@@ -503,6 +505,8 @@ See L<Template::process|Template/process> for a full list of supported formats.
 
 To use the render method outside of your Catalyst app, just pass a undef context. 
 This can be useful for tests, for instance.
+
+FIXME: NOTE forward here
 
 =head2 template_vars
 
