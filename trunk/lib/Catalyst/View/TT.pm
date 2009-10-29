@@ -9,7 +9,7 @@ use Template;
 use Template::Timer;
 use MRO::Compat;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -508,7 +508,7 @@ C<$template> can be anything that Template::process understands how to
 process, including the name of a template file or a reference to a test string.
 See L<Template::process|Template/process> for a full list of supported formats.
 
-To use the render method outside of your Catalyst app, just pass a undef context. 
+To use the render method outside of your Catalyst app, just pass a undef context.
 This can be useful for tests, for instance.
 
 It is possible to forward to the render method of a TT view from inside Catalyst
