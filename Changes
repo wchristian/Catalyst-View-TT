@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.31
+        - Moved the test actions to their own controller file to silence
+          warning about actions in the app class being deprecated.
+
 0.30    2009-09-12 23:47:00
         - Doc fixes:
           + Expand ::V:: to ::View:: (RT #45792)
