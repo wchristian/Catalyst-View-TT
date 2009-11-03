@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.32
+        - The "render()" method now dies on exception, rather than returning
+          the exception object.
+
 0.31    2009-10-29 19:26:00
         - Moved the test actions to their own controller file to silence
           warning about actions in the app class being deprecated.

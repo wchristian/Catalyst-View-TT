@@ -207,10 +207,9 @@ sub process {
         return 0;
     }
 
-    my $output = $self->render($c, $template);
-
-    if (UNIVERSAL::isa($output, 'Template::Exception')) {
-        my $error = qq/Couldn't render template "$output"/;
+    my $output = eval { $self->render($c, $template) };
+    if (my $err = $@) {
+        my $error = qq/Couldn't render template "$template"/;
         $c->log->error($error);
         $c->error($error);
         return 0;
@@ -240,11 +239,9 @@ sub render {
         [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
         if ref $vars->{additional_template_paths};
 
-    unless ($self->template->process( $template, $vars, \$output ) ) {
-        return $self->template->error;
-    } else {
-        return $output;
-    }
+    $self->template->process( $template, $vars, \$output )
+        or die $self->template->error;
+    return $output;
 }
 
 sub template_vars {
@@ -493,7 +490,7 @@ N.B. This is usually done automatically by L<Catalyst::Action::RenderView>.
 
 =head2 render($c, $template, \%args)
 
-Renders the given template and returns output, or a L<Template::Exception>
+Renders the given template and returns output. Throws a L<Template::Exception>
 object upon error.
 
 The template variables are set to C<%$args> if $args is a hashref, or
