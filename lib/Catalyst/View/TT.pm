@@ -300,6 +300,38 @@ to the TT view class.
         $c->forward( $c->view('TT') );
     }
 
+But if you are using the standard auto-generated end action, you don't even need
+to do this!
+
+    # in MyApp::Controller::Root
+    sub end : ActionClass('RenderView') {} # no need to change this line
+
+    # in MyApp.pm
+    __PACKAGE__->config(
+        ...
+        default_view => 'TT',
+    );
+
+This will Just Work.  And it has the advantages that:
+
+=over 4
+
+=item *
+
+If you want to use a different view for a given request, just set 
+<< $c->stash->{current_view} >>.  (See L<Catalyst>'s C<< $c->view >> method
+for details.
+
+=item *
+
+<< $c->res->redirect >> is handled by default.  If you just forward to 
+C<View::TT> in your C<end> routine, you could break this by sending additional
+content.
+
+=back
+
+See L<Catalyst::Action::RenderView> for more details.
+
 =head2 CONFIGURATION
 
 There are a three different ways to configure your view class.  The
