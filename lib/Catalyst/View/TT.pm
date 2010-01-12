@@ -289,7 +289,7 @@ something like this:
 
     use base 'Catalyst::View::TT';
 
-    __PACKAGE__->config->{DEBUG} = 'all';
+    __PACKAGE__->config(DEBUG => 'all');
 
 Now you can modify your action handlers in the main application and/or
 controllers to forward to your view class.  You might choose to do this
