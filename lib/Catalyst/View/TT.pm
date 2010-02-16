@@ -9,7 +9,7 @@ use Template;
 use Template::Timer;
 use MRO::Compat;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -286,7 +286,7 @@ something like this:
 
     use base 'Catalyst::View::TT';
 
-    __PACKAGE__->config->{DEBUG} = 'all';
+    __PACKAGE__->config(DEBUG => 'all');
 
 Now you can modify your action handlers in the main application and/or
 controllers to forward to your view class.  You might choose to do this
@@ -299,6 +299,38 @@ to the TT view class.
         my( $self, $c ) = @_;
         $c->forward( $c->view('TT') );
     }
+
+But if you are using the standard auto-generated end action, you don't even need
+to do this!
+
+    # in MyApp::Controller::Root
+    sub end : ActionClass('RenderView') {} # no need to change this line
+
+    # in MyApp.pm
+    __PACKAGE__->config(
+        ...
+        default_view => 'TT',
+    );
+
+This will Just Work.  And it has the advantages that:
+
+=over 4
+
+=item *
+
+If you want to use a different view for a given request, just set 
+<< $c->stash->{current_view} >>.  (See L<Catalyst>'s C<< $c->view >> method
+for details.
+
+=item *
+
+<< $c->res->redirect >> is handled by default.  If you just forward to 
+C<View::TT> in your C<end> routine, you could break this by sending additional
+content.
+
+=back
+
+See L<Catalyst::Action::RenderView> for more details.
 
 =head2 CONFIGURATION
 
