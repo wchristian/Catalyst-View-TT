@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.32    2010-02-16 05:55:00
+        - Various documentation improvements.
+        - Fix repository metadata.
+
 0.31    2009-10-29 19:26:00
         - Moved the test actions to their own controller file to silence
           warning about actions in the app class being deprecated.
