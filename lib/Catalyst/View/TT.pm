@@ -168,6 +168,7 @@ sub new {
                                    @{ $p->{copy_config} };
                     }
                 }
+                local $@;
                 eval "require $prov";
                 if(!$@) {
                     push @providers, "$prov"->new($p->{args});
@@ -207,6 +208,7 @@ sub process {
         return 0;
     }
 
+    local $@;
     my $output = eval { $self->render($c, $template) };
     if (my $err = $@) {
         my $error = qq/Couldn't render template "$template"/;
