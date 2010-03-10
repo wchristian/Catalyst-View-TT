@@ -9,7 +9,7 @@ use Template;
 use Template::Timer;
 use MRO::Compat;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
