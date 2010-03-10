@@ -9,7 +9,7 @@ use Template;
 use Template::Timer;
 use MRO::Compat;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');
@@ -43,6 +43,7 @@ Catalyst::View::TT - Template View Class
             # Not set by default
             PRE_PROCESS        => 'config/main',
             WRAPPER            => 'site/wrapper',
+            render_die => 1, # Default for new apps, see render method docs
         },
     );
 
@@ -168,6 +169,7 @@ sub new {
                                    @{ $p->{copy_config} };
                     }
                 }
+                local $@;
                 eval "require $prov";
                 if(!$@) {
                     push @providers, "$prov"->new($p->{args});
@@ -207,10 +209,10 @@ sub process {
         return 0;
     }
 
-    my $output = $self->render($c, $template);
-
-    if (UNIVERSAL::isa($output, 'Template::Exception')) {
-        my $error = qq/Couldn't render template "$output"/;
+    local $@;
+    my $output = eval { $self->render($c, $template) };
+    if (my $err = $@) {
+        my $error = qq/Couldn't render template "$template"/;
         $c->log->error($error);
         $c->error($error);
         return 0;
@@ -240,11 +242,16 @@ sub render {
         [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
         if ref $vars->{additional_template_paths};
 
-    unless ($self->template->process( $template, $vars, \$output ) ) {
+    unless ( $self->template->process( $template, $vars, \$output ) ) {
+        if (exists $self->{render_die}) {
+            die $self->template->error if $self->{render_die};
+            return $self->template->error;
+        }
+        require Carp;
+        Carp::carp('The Catalyst::View::TT render() method of will die on error in a future release. If you want it to continue to return the exception instead, pass render_die => 0 to the constructor');
         return $self->template->error;
-    } else {
-        return $output;
     }
+    return $output;
 }
 
 sub template_vars {
@@ -525,7 +532,7 @@ N.B. This is usually done automatically by L<Catalyst::Action::RenderView>.
 
 =head2 render($c, $template, \%args)
 
-Renders the given template and returns output, or a L<Template::Exception>
+Renders the given template and returns output. Throws a L<Template::Exception>
 object upon error.
 
 The template variables are set to C<%$args> if $args is a hashref, or
@@ -547,6 +554,22 @@ It is possible to forward to the render method of a TT view from inside Catalyst
 to render page fragments like this:
 
     my $fragment = $c->forward("View::TT", "render", $template_name, $c->stash->{fragment_data});
+
+=head3 Backwards compatibility note
+
+The render method used to just return the Template::Exception object, rather
+than just throwing it. This is now deprecated and instead the render method
+will throw an exception for new applications.
+
+This behaviour can be activated (and is activated in the default skeleton
+configuration) by using C<< render_die => 1 >>. If you rely on the legacy
+behaviour then a warning will be issued.
+
+To silence this warning, set C<< render_die => 0 >>, but it is recommended
+you adjust your code so that it works with C<< render_die => 1 >>.
+
+In a future release, C<< render_die => 1 >> will become the default if
+unspecified.
 
 =head2 template_vars
 

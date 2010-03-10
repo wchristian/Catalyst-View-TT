@@ -16,6 +16,7 @@ __PACKAGE__->config(
         PRE_CHOMP          => 1,
         POST_CHOMP         => 1,
         TEMPLATE_EXTENSION => '.tt',
+        render_die         => 1,
     },
 );
 

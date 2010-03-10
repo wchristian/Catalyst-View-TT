@@ -1,5 +1,13 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.33   2010-03-10 20:08:00
+        - The "render()" method now throws a warning on exception before
+          returning the exception. To silence the warning, pass 'render_die =>
+          0' to the constructor. Better yet, pass 'render_die => 1' to make it
+          die instead of returning the excption. This will be the default in a
+          future release when unspecified. The Helper will generate new views
+          with render_die => 1.
+
 0.32    2010-02-16 05:55:00
         - Various documentation improvements.
         - Fix repository metadata.
