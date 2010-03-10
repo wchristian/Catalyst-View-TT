@@ -241,8 +241,15 @@ sub render {
         [ @{ $vars->{additional_template_paths} }, @{ $self->{include_path} } ]
         if ref $vars->{additional_template_paths};
 
-    $self->template->process( $template, $vars, \$output )
-        or die $self->template->error;
+    unless ( $self->template->process( $template, $vars, \$output ) ) {
+        if (exists $self->{render_die}) {
+            die $self->template->error if $self->{render_die};
+            return $self->template->error;
+        }
+        require Carp;
+        Carp::carp('The Catalyst::View::TT render() method of will die on error in a future release. If you want it to continue to return the exception instead, pass render_die => 0 to the constructor');
+        return $self->template->error;
+    }
     return $output;
 }
 
