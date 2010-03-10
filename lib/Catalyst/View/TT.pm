@@ -43,6 +43,7 @@ Catalyst::View::TT - Template View Class
             # Not set by default
             PRE_PROCESS        => 'config/main',
             WRAPPER            => 'site/wrapper',
+            render_die => 1, # Default for new apps, see render method docs
         },
     );
 
@@ -553,6 +554,22 @@ It is possible to forward to the render method of a TT view from inside Catalyst
 to render page fragments like this:
 
     my $fragment = $c->forward("View::TT", "render", $template_name, $c->stash->{fragment_data});
+
+=head3 Backwards compatibility note
+
+The render method used to just return the Template::Exception object, rather
+than just throwing it. This is now deprecated and instead the render method
+will throw an exception for new applications.
+
+This behaviour can be activated (and is activated in the default skeleton
+configuration) by using C<< render_die => 1 >>. If you rely on the legacy
+behaviour then a warning will be issued.
+
+To silence this warning, set C<< render_die => 0 >>, but it is recommended
+you adjust your code so that it works with C<< render_die => 1 >>.
+
+In a future release, C<< render_die => 1 >> will become the default if
+unspecified.
 
 =head2 template_vars
 
