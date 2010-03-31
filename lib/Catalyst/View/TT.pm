@@ -28,9 +28,10 @@ Catalyst::View::TT - Template View Class
 
 # configure in lib/MyApp.pm (Could be set from configfile instead)
 
-    MyApp->config(
-        name     => 'MyApp',
-        root     => MyApp->path_to('root'),
+    __PACKAGE__->config(
+        name         => 'MyApp',
+        root         => MyApp->path_to('root'),
+        default_view => 'TT',
         'View::TT' => {
             # any TT configurations items go here
             INCLUDE_PATH => [
