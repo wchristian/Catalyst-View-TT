@@ -8,6 +8,7 @@ use Data::Dump 'dump';
 use Template;
 use Template::Timer;
 use MRO::Compat;
+use Scalar::Util qw/blessed/;
 
 our $VERSION = '0.33';
 
@@ -213,10 +214,10 @@ sub process {
     local $@;
     my $output = eval { $self->render($c, $template) };
     if (my $err = $@) {
-        my $error = qq/Couldn't render template "$template"/;
-        $c->log->error($error);
-        $c->error($error);
-        return 0;
+        return $self->_rendering_error($c, $err);
+    }
+    if (blessed($output) && $output->isa('Template::Exception')) {
+        $self->_rendering_error($c, $output);
     }
 
     unless ( $c->response->content_type ) {
@@ -226,6 +227,14 @@ sub process {
     $c->response->body($output);
 
     return 1;
+}
+
+sub _rendering_error {
+    my ($self, $c, $err) = @_;
+    my $error = qq/Couldn't render template "$err"/;
+    $c->log->error($error);
+    $c->error($error);
+    return 0;
 }
 
 sub render {
@@ -248,8 +257,7 @@ sub render {
             die $self->template->error if $self->{render_die};
             return $self->template->error;
         }
-        require Carp;
-        Carp::carp('The Catalyst::View::TT render() method of will die on error in a future release. If you want it to continue to return the exception instead, pass render_die => 0 to the constructor');
+        $c->log->debug('The Catalyst::View::TT render() method of will die on error in a future release. Unless you are calling the render() method manually, you probably want the new behaviour, so set render_die => 1 in config for ' . blessed($self) . '. If you are calling the render() method manually and you wish it to continue to return the exception rather than throwing it, add render_die => 0 to your config.') if $c->debug;
         return $self->template->error;
     }
     return $output;
