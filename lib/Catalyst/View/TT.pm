@@ -10,7 +10,7 @@ use Template::Timer;
 use MRO::Compat;
 use Scalar::Util qw/blessed/;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('include_path');

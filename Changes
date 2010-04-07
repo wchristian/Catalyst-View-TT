@@ -1,5 +1,15 @@
 Revision history for Perl extension Catalyst::View::TT.
 
+0.34   2010-04-07 04:14:50
+        - Fix the process method to have the previous behaviour of reporting
+          an error to Catalyst if a Template::Exception object is returned by
+          the render method (i.e. when render_die is unset or set to 0).
+        - Fix the warning issued about missing the render_die config option to
+          log using the standard Catalyst logging system (rather than Carping
+          directly), and to only issue the warning at debug level / when
+          in debug mode. The severity of this warning will be increased in
+          a later release.
+
 0.33   2010-03-10 20:08:00
         - The "render()" method now throws a warning on exception before
           returning the exception. To silence the warning, pass 'render_die =>
