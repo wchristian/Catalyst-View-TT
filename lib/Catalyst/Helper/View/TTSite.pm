@@ -49,7 +49,7 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
 
 # use the helper to create the view module and templates
 
-    $ script/myapp_create.pl view TT TTSite
+    $ script/myapp_create.pl view HTML TTSite
 
 # add something like the following to your main application module
 
@@ -64,9 +64,9 @@ Catalyst::Helper::View::TTSite - Helper for TT view which builds a skeleton web 
         $c->stash->{template} = 'welcome.tt2';
     }
 
-    sub end : Private {
+    sub end : Private { # Or use Catalyst::Action::RenderView
         my ( $self, $c ) = @_;
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('HTML') );
     }
 
 =head1 DESCRIPTION
@@ -166,7 +166,8 @@ __PACKAGE__->config({
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',
     ERROR        => 'error.tt2',
-    TIMER        => 0
+    TIMER        => 0,
+    render_die   => 1,
 });
 
 =head1 NAME
