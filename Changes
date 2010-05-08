@@ -2,6 +2,8 @@ Revision history for Perl extension Catalyst::View::TT.
         
         - update render_die message to be more concise.
 
+        - Doc fixes (RT#57159)
+
 0.34   2010-04-07 04:14:50
         - Fix the process method to have the previous behaviour of reporting
           an error to Catalyst if a Template::Exception object is returned by

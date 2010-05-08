@@ -544,9 +544,9 @@ N.B. This is usually done automatically by L<Catalyst::Action::RenderView>.
 Renders the given template and returns output. Throws a L<Template::Exception>
 object upon error.
 
-The template variables are set to C<%$args> if $args is a hashref, or
-$C<< $c->stash >> otherwise. In either case the variables are augmented with
-C<base> set to C< << $c->req->base >>, C<c> to C<$c> and C<name> to
+The template variables are set to C<%$args> if C<$args> is a hashref, or
+C<< $c->stash >> otherwise. In either case the variables are augmented with
+C<base> set to C<< $c->req->base >>, C<c> to C<$c> and C<name> to
 C<< $c->config->{name} >>. Alternately, the C<CATALYST_VAR> configuration item
 can be defined to specify the name of a template variable through which the
 context reference (C<$c>) can be accessed. In this case, the C<c>, C<base> and
