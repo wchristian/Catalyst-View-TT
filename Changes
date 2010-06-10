@@ -1,7 +1,7 @@
 Revision history for Perl extension Catalyst::View::TT.
         
+        - add template name to exceptions
         - update render_die message to be more concise.
-
         - Doc fixes (RT#57159)
 
 0.34   2010-04-07 04:14:50

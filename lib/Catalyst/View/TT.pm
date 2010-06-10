@@ -214,7 +214,7 @@ sub process {
     local $@;
     my $output = eval { $self->render($c, $template) };
     if (my $err = $@) {
-        return $self->_rendering_error($c, $err);
+        return $self->_rendering_error($c, $template . ': ' . $err);
     }
     if (blessed($output) && $output->isa('Template::Exception')) {
         $self->_rendering_error($c, $output);
