@@ -15,6 +15,6 @@ __PACKAGE__->config(
             copy_config => [qw(INCLUDE_PATH DEFAULT_ENCODING PRE_CHOMP POST_CHOMP)]
         }
     ],
-);
+) if eval { require Template::Provider::Encoding; };
 
 1;
