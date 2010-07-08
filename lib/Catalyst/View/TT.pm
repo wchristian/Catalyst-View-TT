@@ -25,28 +25,23 @@ Catalyst::View::TT - Template View Class
 
 # use the helper to create your View
 
-    myapp_create.pl view TT TT
+    myapp_create.pl view Web TT
 
-# configure in lib/MyApp.pm (Could be set from configfile instead)
+# add custom configration in View/Web.pm
 
     __PACKAGE__->config(
-        name         => 'MyApp',
-        root         => MyApp->path_to('root'),
-        default_view => 'TT',
-        'View::TT' => {
-            # any TT configurations items go here
-            INCLUDE_PATH => [
-              MyApp->path_to( 'root', 'src' ),
-              MyApp->path_to( 'root', 'lib' ),
-            ],
-            TEMPLATE_EXTENSION => '.tt',
-            CATALYST_VAR => 'c',
-            TIMER        => 0,
-            # Not set by default
-            PRE_PROCESS        => 'config/main',
-            WRAPPER            => 'site/wrapper',
-            render_die => 1, # Default for new apps, see render method docs
-        },
+        # any TT configuration items go here
+        INCLUDE_PATH => [
+          MyApp->path_to( 'root', 'src' ),
+          MyApp->path_to( 'root', 'lib' ),
+        ],
+        TEMPLATE_EXTENSION => '.tt',
+        CATALYST_VAR => 'c',
+        TIMER        => 0,
+        # Not set by default
+        PRE_PROCESS        => 'config/main',
+        WRAPPER            => 'site/wrapper',
+        render_die => 1, # Default for new apps, see render method docs
     );
 
 # render view from lib/MyApp.pm or lib/MyApp::Controller::SomeController.pm
@@ -55,7 +50,7 @@ Catalyst::View::TT - Template View Class
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  = 'Hello World!';
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('Web') );
     }
 
 # access variables from template
@@ -287,18 +282,20 @@ __END__
 
 This is the Catalyst view class for the L<Template Toolkit|Template>.
 Your application should defined a view class which is a subclass of
-this module.  The easiest way to achieve this is using the
-F<myapp_create.pl> script (where F<myapp> should be replaced with
-whatever your application is called).  This script is created as part
-of the Catalyst setup.
+this module. Throughout this manual it will be assumed that your application
+is named F<MyApp> and you are creating a TT view named F<Web>; these names
+are placeholders and should always be replaced with whatever name you've
+chosen for your application and your view. The easiest way to create a TT
+view class is through the F<myapp_create.pl> script that is created along
+with the application:
 
-    $ script/myapp_create.pl view TT TT
+    $ script/myapp_create.pl view Web TT
 
-This creates a MyApp::View::TT.pm module in the F<lib> directory (again,
+This creates a F<MyApp::View::Web.pm> module in the F<lib> directory (again,
 replacing C<MyApp> with the name of your application) which looks
 something like this:
 
-    package FooBar::View::TT;
+    package FooBar::View::Web;
 
     use strict;
     use warnings;
@@ -316,7 +313,7 @@ to the TT view class.
 
     sub end : Private {
         my( $self, $c ) = @_;
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('Web') );
     }
 
 But if you are using the standard auto-generated end action, you don't even need
@@ -328,7 +325,7 @@ to do this!
     # in MyApp.pm
     __PACKAGE__->config(
         ...
-        default_view => 'TT',
+        default_view => 'Web',
     );
 
 This will Just Work.  And it has the advantages that:
@@ -344,7 +341,7 @@ for details.
 =item *
 
 << $c->res->redirect >> is handled by default.  If you just forward to 
-C<View::TT> in your C<end> routine, you could break this by sending additional
+C<View::Web> in your C<end> routine, you could break this by sending additional
 content.
 
 =back
@@ -357,12 +354,12 @@ There are a three different ways to configure your view class.  The
 first way is to call the C<config()> method in the view subclass.  This
 happens when the module is first loaded.
 
-    package MyApp::View::TT;
+    package MyApp::View::Web;
 
     use strict;
     use base 'Catalyst::View::TT';
 
-    MyApp::View::TT->config({
+    __PACKAGE__->config({
         INCLUDE_PATH => [
             MyApp->path_to( 'root', 'templates', 'lib' ),
             MyApp->path_to( 'root', 'templates', 'src' ),
@@ -371,54 +368,21 @@ happens when the module is first loaded.
         WRAPPER      => 'site/wrapper',
     });
 
-The second way is to define a C<new()> method in your view subclass.
-This performs the configuration when the view object is created,
-shortly after being loaded.  Remember to delegate to the base class
-C<new()> method (via C<$self-E<gt>next::method()> in the example below) after
-performing any configuration.
+You may also override the configuration provided in the view class by adding
+a 'View::Web' section to your application config (either in the application
+main class, or in your configuration file). This should be reserved for
+deployment-specific concerns. For example:
 
-    sub new {
-        my $self = shift;
-        $self->config({
-            INCLUDE_PATH => [
-                MyApp->path_to( 'root', 'templates', 'lib' ),
-                MyApp->path_to( 'root', 'templates', 'src' ),
-            ],
-            PRE_PROCESS  => 'config/main',
-            WRAPPER      => 'site/wrapper',
-        });
-        return $self->next::method(@_);
-    }
+    # MyApp_local.conf (Config::General format)
 
-The final, and perhaps most direct way, is to define a class
-item in your main application configuration, again by calling the
-ubiquitous C<config()> method.  The items in the class hash are
-added to those already defined by the above two methods.  This happens
-in the base class new() method (which is one reason why you must
-remember to call it via C<MRO::Compat> if you redefine the C<new()>
-method in a subclass).
+    <View Web>
+      WRAPPER "custom_wrapper"
+      INCLUDE_PATH __path_to('root/templates/custom_site')__
+      INCLUDE_PATH __path_to('root/templates')__
+    </View>
 
-    package MyApp;
-
-    use strict;
-    use Catalyst;
-
-    MyApp->config({
-        name     => 'MyApp',
-        root     => MyApp->path_to('root'),
-        'View::TT' => {
-            INCLUDE_PATH => [
-                MyApp->path_to( 'root', 'templates', 'lib' ),
-                MyApp->path_to( 'root', 'templates', 'src' ),
-            ],
-            PRE_PROCESS  => 'config/main',
-            WRAPPER      => 'site/wrapper',
-        },
-    });
-
-Note that any configuration items defined by one of the earlier
-methods will be overwritten by items of the same name provided by the
-latter methods.
+might be used as part of a simple way to deploy different instances of the
+same application with different themes.
 
 =head2 DYNAMIC INCLUDE_PATH
 
@@ -433,7 +397,7 @@ follows:
 If you need to add paths to the end of INCLUDE_PATH, there is also an
 include_path() accessor available:
 
-    push( @{ $c->view('TT')->include_path }, qw/path/ );
+    push( @{ $c->view('Web')->include_path }, qw/path/ );
 
 Note that if you use include_path() to add extra paths to INCLUDE_PATH, you
 MUST check for duplicate paths. Without such checking, the above code will add
@@ -443,7 +407,7 @@ A safer approach is to use include_path() to overwrite the array of paths
 rather than adding to it. This eliminates both the need to perform duplicate
 checking and the chance of a memory leak:
 
-    @{ $c->view('TT')->include_path } = qw/path another_path/;
+    @{ $c->view('Web')->include_path } = qw/path another_path/;
 
 If you are calling C<render> directly then you can specify dynamic paths by
 having a C<additional_template_paths> key with a value of additonal directories
@@ -457,7 +421,7 @@ item in the stash.
     sub message : Global {
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('Web') );
     }
 
 If a stash item isn't defined, then it instead uses the
@@ -472,7 +436,7 @@ use as template variables.
         my ( $self, $c ) = @_;
         $c->stash->{template} = 'message.tt2';
         $c->stash->{message}  = 'Hello World!';
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('Web') );
     }
 
 A number of other template variables are also added:
@@ -506,7 +470,7 @@ L<Catalyst::Plugin::Email> and the L<render> method:
         To      => 'me@localhost',
         Subject => 'A TT Email',
       ],
-      body => $c->view('TT')->render($c, 'email.tt', {
+      body => $c->view('Web')->render($c, 'email.tt', {
         additional_template_paths => [ $c->config->{root} . '/email_templates'],
         email_tmpl_param1 => 'foo'
         }
@@ -535,7 +499,7 @@ perform actual rendering. Output is stored in C<< $c->response->body >>.
 It is possible to forward to the process method of a TT view from inside
 Catalyst like this:
 
-    $c->forward('View::TT');
+    $c->forward('View::Web');
 
 N.B. This is usually done automatically by L<Catalyst::Action::RenderView>.
 
@@ -562,7 +526,7 @@ This can be useful for tests, for instance.
 It is possible to forward to the render method of a TT view from inside Catalyst
 to render page fragments like this:
 
-    my $fragment = $c->forward("View::TT", "render", $template_name, $c->stash->{fragment_data});
+    my $fragment = $c->forward("View::Web", "render", $template_name, $c->stash->{fragment_data});
 
 =head3 Backwards compatibility note
 
@@ -599,17 +563,8 @@ The list of paths TT will look for templates in.
 Allows you to change the name of the Catalyst context object. If set, it will also
 remove the base and name aliases, so you will have access them through <context>.
 
-For example:
-
-    MyApp->config({
-        name     => 'MyApp',
-        root     => MyApp->path_to('root'),
-        'View::TT' => {
-            CATALYST_VAR => 'Catalyst',
-        },
-    });
-
-F<message.tt2>:
+For example, if CATALYST_VAR has been set to "Catalyst", a template might
+contain:
 
     The base is [% Catalyst.req.base %]
     The name is [% Catalyst.config.name %]
@@ -651,7 +606,7 @@ Allows you to specify the template providers that TT will use.
     MyApp->config({
         name     => 'MyApp',
         root     => MyApp->path_to('root'),
-        'View::TT' => {
+        'View::Web' => {
             PROVIDERS => [
                 {
                     name    => 'DBI',
@@ -695,9 +650,9 @@ The L<Catalyst::Helper::View::TT> and
 L<Catalyst::Helper::View::TTSite> helper modules are provided to create
 your view module.  There are invoked by the F<myapp_create.pl> script:
 
-    $ script/myapp_create.pl view TT TT
+    $ script/myapp_create.pl view Web TT
 
-    $ script/myapp_create.pl view TT TTSite
+    $ script/myapp_create.pl view Web TTSite
 
 The L<Catalyst::Helper::View::TT> module creates a basic TT view
 module.  The L<Catalyst::Helper::View::TTSite> module goes a little
