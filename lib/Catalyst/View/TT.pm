@@ -42,6 +42,7 @@ Catalyst::View::TT - Template View Class
         PRE_PROCESS        => 'config/main',
         WRAPPER            => 'site/wrapper',
         render_die => 1, # Default for new apps, see render method docs
+        expose_methods => [qw/method_in_view_class/],
     );
 
 # render view from lib/MyApp.pm or lib/MyApp::Controller::SomeController.pm
@@ -264,15 +265,30 @@ sub template_vars {
     return  () unless $c;
     my $cvar = $self->config->{CATALYST_VAR};
 
-    defined $cvar
+    my %vars = defined $cvar
       ? ( $cvar => $c )
       : (
         c    => $c,
         base => $c->req->base,
         name => $c->config->{name}
-      )
-}
+      );
 
+    if ($self->config->{expose_methods}) {
+        my $meta = $self->meta;
+        foreach my $method_name (@{$self->config->{expose_methods}}) {
+            my $method = $meta->get_method( $method_name );
+            unless ($method) {
+                Catalyst::Exception->throw( "$method_name not found in TT view" );
+            }
+            my $method_body = $method->body;
+            my $sub = sub {
+                $self->$method_body($c, @_);
+            };
+            $vars{$method_name} = $sub;
+        }
+    }
+    return %vars;
+}
 
 1;
 
@@ -557,6 +573,28 @@ the TT configuration hash, or to set the options as below:
 =head2 paths
 
 The list of paths TT will look for templates in.
+
+=head2 expose_methods
+
+The list of methods in your View class which should be made available to the templates.
+
+For example:
+
+  expose_methods => [qw/uri_for_static/],
+
+  ...
+
+  sub uri_for_css {
+    my ($self, $c, $filename) = @_;
+
+    # additional complexity like checking file exists here
+
+    return $c->uri_for('/static/css/' . $filename);
+  }
+
+Then in the template:
+
+  [% uri_for_css('home.css') %]
 
 =head2 C<CATALYST_VAR>
 
