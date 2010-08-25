@@ -8,7 +8,7 @@ use Data::Dump 'dump';
 use Template;
 use Template::Timer;
 use MRO::Compat;
-use Scalar::Util qw/blessed/;
+use Scalar::Util qw/blessed weaken/;
 
 our $VERSION = '0.34';
 
@@ -283,8 +283,10 @@ sub template_vars {
                 Catalyst::Exception->throw( "$method_name not found in TT view" );
             }
             my $method_body = $method->body;
+            my $weak_ctx = $c;
+            weaken $weak_ctx;
             my $sub = sub {
-                $self->$method_body($c, @_);
+                $self->$method_body($weak_ctx, @_);
             };
             $vars{$method_name} = $sub;
         }
