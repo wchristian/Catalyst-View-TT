@@ -728,6 +728,8 @@ Jesse Sheidlower, C<jester@panix.com>
 
 Andy Wardley, C<abw@cpan.org>
 
+Luke Saunders, C<luke.saunders@gmail.com>
+
 =head1 COPYRIGHT
 
 This program is free software. You can redistribute it and/or modify it
