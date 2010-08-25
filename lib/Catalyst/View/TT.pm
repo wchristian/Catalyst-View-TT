@@ -13,6 +13,7 @@ use Scalar::Util qw/blessed/;
 our $VERSION = '0.34';
 
 __PACKAGE__->mk_accessors('template');
+__PACKAGE__->mk_accessors('expose_methods');
 __PACKAGE__->mk_accessors('include_path');
 
 *paths = \&include_path;
@@ -128,6 +129,7 @@ sub new {
     # Set base include paths. Local'd in render if needed
     $self->include_path($config->{INCLUDE_PATH});
 
+    $self->expose_methods($config->{expose_methods});
     $self->config($config);
 
     # Creation of template outside of call to new so that we can pass [ $self ]
@@ -273,9 +275,9 @@ sub template_vars {
         name => $c->config->{name}
       );
 
-    if ($self->config->{expose_methods}) {
+    if ($self->expose_methods) {
         my $meta = $self->meta;
-        foreach my $method_name (@{$self->config->{expose_methods}}) {
+        foreach my $method_name (@{$self->expose_methods}) {
             my $method = $meta->get_method( $method_name );
             unless ($method) {
                 Catalyst::Exception->throw( "$method_name not found in TT view" );
