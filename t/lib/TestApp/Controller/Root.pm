@@ -12,6 +12,7 @@ sub test : Local {
     my ($self, $c) = @_;
 
     $c->stash->{message} = ($c->request->param('message') || $c->config->{default_message});
+    $c->stash->{template} = $c->request->param('template');
 }
 
 sub test_includepath : Local {
