@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::View::TT.
-        
-0.35   2010-08-25 19:42:00
+
+0.35   2010-08-26 01:34:00
         - Add expose_methods functionality
         - add template name to exceptions
         - update render_die message to be more concise.
