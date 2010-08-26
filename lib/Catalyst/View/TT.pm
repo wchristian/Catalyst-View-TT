@@ -10,7 +10,7 @@ use Template::Timer;
 use MRO::Compat;
 use Scalar::Util qw/blessed weaken/;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 __PACKAGE__->mk_accessors('template');
 __PACKAGE__->mk_accessors('expose_methods');
@@ -584,7 +584,7 @@ The list of methods in your View class which should be made available to the tem
 
 For example:
 
-  expose_methods => [qw/uri_for_static/],
+  expose_methods => [qw/uri_for_css/],
 
   ...
 
