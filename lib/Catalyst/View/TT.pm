@@ -584,7 +584,7 @@ The list of methods in your View class which should be made available to the tem
 
 For example:
 
-  expose_methods => [qw/uri_for_static/],
+  expose_methods => [qw/uri_for_css/],
 
   ...
 
