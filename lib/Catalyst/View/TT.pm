@@ -89,6 +89,7 @@ sub new {
     my $config = {
         EVAL_PERL          => 0,
         TEMPLATE_EXTENSION => '',
+        CLASS              => 'Template',
         %{ $class->config },
         %{$arguments},
     };
@@ -188,8 +189,8 @@ sub new {
     }
 
     $self->{template} =
-        Template->new($config) || do {
-            my $error = Template->error();
+        $config->{CLASS}->new($config) || do {
+            my $error = $config->{CLASS}->error();
             $c->log->error($error);
             $c->error($error);
             return undef;
@@ -686,6 +687,26 @@ from the general config, into the config for the provider:
 
 This can prove useful when you want to use the additional_template_paths hack
 in your own provider, or if you need to use Template::Provider::Encoding
+
+=head2 C<CLASS>
+
+Allows you to specify a custom class to use as the template class instead of
+L<Template>.
+
+    package MyApp::View::Web;
+
+    use strict;
+    use base 'Catalyst::View::TT';
+
+    use Template::AutoFilter;
+
+    __PACKAGE__->config({
+        CLASS => 'Template::AutoFilter',
+    });
+
+This is useful if you want to use your own subclasses of L<Template>, so you
+can, for example, prevent XSS by automatically filtering all output through
+C<| html>.
 
 =head2 HELPERS
 
