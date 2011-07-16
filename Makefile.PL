@@ -19,6 +19,6 @@ requires 'MRO::Compat'     => 0;
 test_requires 'Test::More';
 
 auto_install;
-resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-View-TT/';
+resources repository => 'git://git.shadowcat.co.uk/catagits/Catalyst-View-TT.git';
 
 WriteAll;
